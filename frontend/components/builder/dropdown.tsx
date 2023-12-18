@@ -1,4 +1,3 @@
-'use client'
 import React from 'react';
 import { Accordion, AccordionItem, AccordionButton, AccordionPanel, Box}  from '@chakra-ui/react';
 

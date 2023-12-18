@@ -1,4 +1,3 @@
-'use client'
 import React, { useState } from 'react';
 import Sidebar from '../components/layout/sidebar';
 import TemplateArea from '../components/builder/templatearea';

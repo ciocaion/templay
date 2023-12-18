@@ -1,4 +1,3 @@
-'use client'
 import React, { useState, useEffect } from 'react';
 import { Button } from '@chakra-ui/react';
 import { useDraggable } from '@dnd-kit/core';

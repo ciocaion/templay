@@ -1,4 +1,3 @@
-'use client'
 import React from 'react';
 import { Box, Editable, EditablePreview, EditableInput, Flex } from '@chakra-ui/react';
 import { useDraggable } from '@dnd-kit/core';

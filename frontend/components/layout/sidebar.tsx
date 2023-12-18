@@ -1,4 +1,3 @@
-'use client'
 import React from "react";
 import { Box, VStack, Image } from "@chakra-ui/react";
 import ButtonGroup from '../ui/groupbutton';
