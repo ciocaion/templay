@@ -6,8 +6,13 @@ import * as mysql from 'mysql2';
 
 const app = express();
 
-// Enable All CORS Requests for simplicity, or configure as needed
-app.use(cors());
+const corsOptions = {
+  origin: 'https://templay.vercel.app/', // Replace with your frontend URL
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true, // Enable credentials (if needed)
+};
+
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
