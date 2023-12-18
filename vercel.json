@@ -1,16 +1,17 @@
 {
-    "version": 2,
-    "routes": [
-      {
-        "src": "/api/(.*)",
-        "dest": "server.ts"
-      }
-    ],
-    "builds": [
-      {
-        "src": "server.ts",
-        "use": "@now/node-server"
-      }
-    ]
-  }
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.ts",
+      "use": "@now/node-server"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "server.ts"
+    }
+  ],
+  "output": "public" 
   
+}
