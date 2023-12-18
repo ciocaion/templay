@@ -6,13 +6,8 @@ import * as mysql from 'mysql2';
 
 const app = express();
 
-const corsOptions = {
-  origin: '*', // Replace with your frontend URL
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true, // Enable credentials (if needed)
-};
 
-app.use(cors(corsOptions));
+app.use(cors());
 
 const port = 4000;
 
