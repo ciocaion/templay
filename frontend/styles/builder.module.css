@@ -1,0 +1,39 @@
+.dropZone {
+    display: grid;
+    grid-gap: 20px;
+  }
+  
+  /* Placeholders */
+  .placeholder {
+    border: 2px dashed gray;
+    height: 200px;
+  }
+  
+  /* Responsive grid layouts */
+  .ONE_COLUMN {
+    grid-template-columns: 1fr;
+  }
+  
+  .TWO_COLUMN {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .TWO_COLUMN_WIDE_LEFT {
+    grid-template-columns: 2fr 1fr;
+  }
+  
+  .TWO_COLUMN_WIDE_RIGHT {
+    grid-template-columns: 1fr 2fr;
+  }
+  
+  .THREE_COLUMN {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  /* Adjustments for smaller screens */
+  @media (max-width: 600px) {
+    .TWO_COLUMN, .TWO_COLUMN_WIDE_LEFT, .TWO_COLUMN_WIDE_RIGHT, .THREE_COLUMN {
+      grid-template-columns: 1fr; /* Stack columns on smaller screens */
+    }
+  }
+  
