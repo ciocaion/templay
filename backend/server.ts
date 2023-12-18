@@ -9,8 +9,6 @@ const app = express();
 // Enable All CORS Requests for simplicity, or configure as needed
 app.use(cors());
 
-const port = 4000;
-
 app.use(express.json());
 
 app.get('/api/test', (_req, res) => {
@@ -78,7 +76,3 @@ app.get('/api', (_req, res) => {
     });
   });
   
-
-app.listen(port, () => {
-  console.log(`Server listening on http://localhost:${port}`);
-});
