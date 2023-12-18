@@ -75,7 +75,7 @@ function Builder() {
         gridItems: gridItems
       };
   
-      const response = await fetch('https://templay-backend-ciocaion.vercel.app/api/templates', {
+      const response = await fetch('https://templay-backend.vercel.app/api/templates', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -96,7 +96,7 @@ function Builder() {
   
   const handleRetrieveTemplate = async (templateId: string) => {
     try {
-      const response = await fetch(`https://templay-backend-ciocaion.vercel.app/api/templates/${templateId}`);
+      const response = await fetch(`https://templay-backend.vercel.app/api/templates/${templateId}`);
   
       if (!response.ok) {
         throw new Error('Network response was not ok');

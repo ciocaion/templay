@@ -8,7 +8,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 function MyApp({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
-    fetch('https://templay-backend-ciocaion.vercel.app/api') // Update with your backend URL and port
+    fetch('https://templay-backend.vercel.app/api') // Update with your backend URL and port
       .then(response => response.json())
       .then(data => console.log('Response from backend:', data))
       .catch(error => console.error('Error fetching data:', error));

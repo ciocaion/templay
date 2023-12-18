@@ -7,7 +7,7 @@ import * as mysql from 'mysql2';
 const app = express();
 
 const corsOptions = {
-  origin: 'https://templay-ciocaion.vercel.app/', // Replace with your frontend URL
+  origin: 'https://templay.vercel.app', // Replace with your frontend URL
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true, // Enable credentials (if needed)
 };
