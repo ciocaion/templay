@@ -6,11 +6,10 @@ import * as mysql from 'mysql2';
 
 const app = express();
 
-
+// Enable All CORS Requests for simplicity, or configure as needed
 app.use(cors());
 
 const port = 4000;
-
 
 app.use(express.json());
 
@@ -79,6 +78,7 @@ app.get('/api', (_req, res) => {
     });
   });
   
-  app.listen(port, () => {
-    console.log(`Server listening on http://localhost:${port}`);
-  });
+
+app.listen(port, () => {
+  console.log(`Server listening on http://localhost:${port}`);
+});
