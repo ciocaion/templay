@@ -6,10 +6,13 @@ import * as mysql from 'mysql2';
 
 const app = express();
 
-// Enable All CORS Requests for simplicity, or configure as needed
-app.use(cors());
+const corsOptions = {
+  origin: 'https://templay-frontend.vercel.app/', // Replace with your frontend URL
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true, // Enable credentials (if needed)
+};
 
-const port = 4000;
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
@@ -77,8 +80,3 @@ app.get('/api', (_req, res) => {
       }
     });
   });
-  
-
-app.listen(port, () => {
-  console.log(`Server listening on http://localhost:${port}`);
-});
