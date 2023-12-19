@@ -33,6 +33,8 @@ const GridComponent: React.FC<GridComponentProps> = ({ layout, items, onDrop }) 
 
     const droppedItems = items[droppableId] || [];
 
+    console.log("Rendering Droppable Grid Item", droppableId);
+
     return (
       <GridItem ref={setNodeRef} key={key} border="2px dashed #020281" p={40} bg={itemIsOver ? 'lightgray' : 'white'}>
         {droppedItems.map((item) => {
@@ -42,10 +44,6 @@ const GridComponent: React.FC<GridComponentProps> = ({ layout, items, onDrop }) 
               return <Banner key={item.id} width="100%" />;
             case 'HERO':
               return <Hero key={item.id} />;
-            case 'PAGE':
-              return <PageContent key={item.id} />;
-            case 'IMAGE':
-              return <ImageBlock key={item.id} />;
             default:
               return <div key={item.id}>{item.type}</div>;
           }

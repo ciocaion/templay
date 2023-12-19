@@ -29,13 +29,11 @@ const TemplateArea: React.FC<TemplateAreaProps> = ({ items, gridItems, onDrop })
 
     switch (item.type) {
       case 'BANNER':
-        console.log('Rendering BANNER:', item);
         return <Banner key={key} />;
       case 'HERO':
-        console.log('Rendering HERO:', item);
         return <Hero key={key} />;
       case 'GRID':
-        console.log('Rendering GRID:', item);
+        console.log('Passing onDrop to GridComponent', onDrop);
         return (
           <div key={key}>
             {item.layoutType && 
@@ -51,20 +49,16 @@ const TemplateArea: React.FC<TemplateAreaProps> = ({ items, gridItems, onDrop })
           </div>
         );
       case 'PAGE':
-        console.log('Rendering PAGE:', item);
         return <PageContent key={key} />;
       case 'TEXT':
-        console.log('Rendering TEXT:', item);
         return <RichText key={key} />;
       case 'IMAGE':
-        console.log('Rendering IMAGE:', item);
         return <ImageBlock key={key} />;
       default:
         return null;
     }
   };
 
-  console.log('Rendering TemplateArea:', items);
 
   return (
     <div
