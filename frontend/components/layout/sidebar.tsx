@@ -76,9 +76,7 @@ const pageMenuItems = [
 function DraggableItem({ id, content }: DraggableItemProps) {
   const type = (content as React.ReactElement).props.type;
 
-  // Debugging log to ensure id is correctly set
-  console.log("Creating DraggableItem with ID:", id, "and Type:", type);
-
+  
   const { attributes, listeners, setNodeRef } = useDraggable({
     id, // Ensuring this is the specific layout id
     data: { type, layoutId: id } // Passing both type and specific layout id

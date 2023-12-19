@@ -21,7 +21,7 @@ interface TemplateAreaProps {
   onDrop: (droppableId: string, draggableId: string, draggableItem: TemplateItem) => void;
 }
 
-const TemplateArea: React.FC<TemplateAreaProps> = ({ items,gridItems, onDrop }) => {
+const TemplateArea: React.FC<TemplateAreaProps> = ({ items, gridItems, onDrop }) => {
   const { setNodeRef } = useDroppable({ id: 'droppable' });
 
   const renderItem = (item: TemplateItem, index: number) => {
@@ -29,31 +29,42 @@ const TemplateArea: React.FC<TemplateAreaProps> = ({ items,gridItems, onDrop }) 
 
     switch (item.type) {
       case 'BANNER':
+        console.log('Rendering BANNER:', item);
         return <Banner key={key} />;
       case 'HERO':
+        console.log('Rendering HERO:', item);
         return <Hero key={key} />;
-        case 'GRID':
-  return (
-    <div key={key}>
-      {item.layoutType && 
-        <GridComponent 
-          layout={item.layoutType} 
-          items={gridItems}
-          onDrop={(droppableId, draggableId, draggableItem) => onDrop(droppableId, draggableId, draggableItem)} 
-        />
-      }
-    </div>
-  );
-  case 'PAGE':
-    return <PageContent key={key} />;
-    case 'TEXT':
-    return <RichText key={key} />;
-    case 'IMAGE':
-      return <ImageBlock key={key} />;
+      case 'GRID':
+        console.log('Rendering GRID:', item);
+        return (
+          <div key={key}>
+            {item.layoutType && 
+              <GridComponent 
+                layout={item.layoutType} 
+                items={gridItems}
+                onDrop={(droppableId, draggableId, draggableItem) => {
+                  console.log('Dropping onto GRID:', droppableId, draggableId, draggableItem);
+                  onDrop(droppableId, draggableId, draggableItem);
+                }} 
+              />
+            }
+          </div>
+        );
+      case 'PAGE':
+        console.log('Rendering PAGE:', item);
+        return <PageContent key={key} />;
+      case 'TEXT':
+        console.log('Rendering TEXT:', item);
+        return <RichText key={key} />;
+      case 'IMAGE':
+        console.log('Rendering IMAGE:', item);
+        return <ImageBlock key={key} />;
       default:
         return null;
     }
   };
+
+  console.log('Rendering TemplateArea:', items);
 
   return (
     <div

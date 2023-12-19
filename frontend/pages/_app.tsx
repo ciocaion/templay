@@ -1,11 +1,14 @@
 "use client";
-import React, { useEffect } from 'react';
+import React, { useEffect, useId } from 'react';
 import { AppProps } from 'next/app';
 import { ChakraProvider } from '@chakra-ui/react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import { DndContext } from '@dnd-kit/core';
+
 
 function MyApp({ Component, pageProps }: AppProps) {
+
+  const id = useId()
+
 
   useEffect(() => {
     fetch('http://localhost:4000/api') // Update with your backend URL and port
@@ -16,9 +19,9 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <ChakraProvider>
-      <DndProvider backend={HTML5Backend}>
+      <DndContext id={id} >
         <Component {...pageProps} />
-      </DndProvider>
+      </DndContext>
     </ChakraProvider>
   );
 }

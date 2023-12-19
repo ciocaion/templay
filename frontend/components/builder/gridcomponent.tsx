@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Grid, GridItem } from '@chakra-ui/react';
 import { useDroppable } from '@dnd-kit/core';
 import Banner from './banner'; 
@@ -21,14 +21,20 @@ interface GridComponentProps {
 }
 
 const GridComponent: React.FC<GridComponentProps> = ({ layout, items, onDrop }) => {
+  // Maintain a state object to store dropped items for each grid type
+  const [droppedGrids, setDroppedGrids] = useState<{ [key: string]: string[] }>({});
+
+  // Use useDroppable to make the GridComponent a drop target
+  const { setNodeRef: gridRef, isOver } = useDroppable({ id: `grid-${layout}` });
+
   const renderDroppableGridItem = (key: number) => {
     const droppableId = `droppable-${layout}-${key}`;
-    const { setNodeRef, isOver } = useDroppable({ id: droppableId });
+    const { setNodeRef, isOver: itemIsOver } = useDroppable({ id: droppableId });
 
     const droppedItems = items[droppableId] || [];
 
     return (
-      <GridItem ref={setNodeRef} key={key} border="2px dashed #020281" p={40} bg={isOver ? 'lightgray' : 'white'}>
+      <GridItem ref={setNodeRef} key={key} border="2px dashed #020281" p={40} bg={itemIsOver ? 'lightgray' : 'white'}>
         {droppedItems.map((item) => {
           // Render different components based on item type
           switch (item.type) {
@@ -36,10 +42,10 @@ const GridComponent: React.FC<GridComponentProps> = ({ layout, items, onDrop }) 
               return <Banner key={item.id} width="100%" />;
             case 'HERO':
               return <Hero key={item.id} />;
-              case 'PAGE':
-                return <PageContent key={item.id} />;
-                case 'IMAGE':
-                  return <ImageBlock key={item.id} />;
+            case 'PAGE':
+              return <PageContent key={item.id} />;
+            case 'IMAGE':
+              return <ImageBlock key={item.id} />;
             default:
               return <div key={item.id}>{item.type}</div>;
           }
@@ -47,8 +53,6 @@ const GridComponent: React.FC<GridComponentProps> = ({ layout, items, onDrop }) 
       </GridItem>
     );
   };
-
-
 
   const renderGridItems = () => {
     const numberOfColumns = {
@@ -70,14 +74,29 @@ const GridComponent: React.FC<GridComponentProps> = ({ layout, items, onDrop }) 
     'singleColumn': '1fr',
   }[layout] || '1fr';
 
+  // Clear the dropped items state for the current grid type
+  useEffect(() => {
+    console.log('layout changed to:', layout);
+    if (droppedGrids[layout]) {
+      console.log('Clearing dropped items for layout:', layout);
+      setDroppedGrids((prevDroppedGrids) => ({ ...prevDroppedGrids, [layout]: [] }));
+    }
+  }, [layout]);
+
+  console.log('isOver:', isOver);
+  console.log('droppedGrids:', droppedGrids);
+
   return (
     <Box>
+      {/* Use gridRef as the ref for the GridComponent */}
       <Grid
+        ref={gridRef}
         templateColumns={gridTemplateColumns}
         gap={4}
         margin="32px"
         padding="0px"
         overflow="hidden"
+        bg={isOver ? 'lightgray' : 'white'}
       >
         {renderGridItems()}
       </Grid>

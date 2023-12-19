@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 import Sidebar from '../components/layout/sidebar';
 import TemplateArea from '../components/builder/templatearea';
 import { GridLayoutType } from '../components/builder/gridcomponent';
@@ -12,30 +12,51 @@ interface DraggableItem {
 }
 
 function Builder() {
+  const id = useId()
+
   const [droppedItems, setDroppedItems] = useState<DraggableItem[]>([]);
   const [gridItems, setGridItems] = useState<{ [key: string]: DraggableItem[] }>({
     'droppable-twoColumnEqual-0': [],
     'droppable-twoColumnEqual-1': [],
   });
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  
 
-  const handleDrop = (droppableId: string, draggableId: any, draggableItem: DraggableItem) => {
-    // Check if the drop is on a grid
+  const handleDrop = (droppableId: string, draggableId: string, draggableItem: any) => {
+    console.log('handleDrop called with:', droppableId, draggableId, draggableItem);
+
     if (droppableId.startsWith('droppable-')) {
-      setGridItems(prev => ({
-        ...prev,
-        [droppableId]: [...(prev[droppableId] || []), draggableItem]
-      }));
+      // Check if the grid type is the same and reset its state
+      const isSameGridType = gridItems[droppableId]?.some(item => item.type === draggableItem.type);
+      if (isSameGridType) {
+        console.log('Same grid type dropped:', draggableItem.type);
+        // Update the existing grid
+        setGridItems(prev => ({
+          ...prev,
+          [droppableId]: prev[droppableId].map(item => {
+            if (item.type === draggableItem.type) {
+              console.log('Clearing contents of existing grid:', droppableId);
+              return { ...item, contents: [] }; // Clear the contents of the existing grid
+            }
+            return item;
+          })
+        }));
+      } else {
+        // Generate a unique ID for each dropped grid
+        const newGridId = `grid-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+        // Then add the new grid item
+        const newGridItem = { ...draggableItem, id: newGridId, contents: [] };
+        console.log('Creating a new grid:', droppableId, newGridItem);
+        setGridItems(prev => ({
+          ...prev,
+          [droppableId]: [...(prev[droppableId] || []), newGridItem]
+        }));
+      }
     } else {
-      // Handle drops on the main template area
-      setDroppedItems(prevItems => [
-        ...prevItems,
-        draggableItem
-      ]);
+      setDroppedItems(prevItems => [...prevItems, draggableItem]);
     }
   };
-  
+
   const sensors = useSensors(useSensor(PointerSensor));
 
   const handleDragStart = (event: { clientX: any; clientY: any; }) => {
@@ -43,6 +64,8 @@ function Builder() {
   };
 
   const handleDragEnd = (event: { active: any; over: any; delta: any; }) => {
+    console.log('handleDragEnd called with:', event);
+
     const { active, over, delta } = event;
     const { type: itemType, layoutId } = active.data.current;
 
@@ -74,7 +97,7 @@ function Builder() {
         items: droppedItems,
         gridItems: gridItems
       };
-  
+
       const response = await fetch('http://localhost:4000/api/templates', {
         method: 'POST',
         headers: {
@@ -82,29 +105,29 @@ function Builder() {
         },
         body: JSON.stringify(templateData)
       });
-  
+
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-  
+
       const responseData = await response.json();
       console.log('Save successful:', responseData);
     } catch (error) {
       console.error('Error saving template:', error);
     }
   };
-  
+
   const handleRetrieveTemplate = async (templateId: string) => {
     try {
       const response = await fetch(`http://localhost:4000/api/templates/${templateId}`);
-  
+
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-  
+
       const template = await response.json();
       console.log('Retrieved template:', template);
-  
+
       // Parse the template_json field to an object
       const parsedTemplate = JSON.parse(template.template_json);
       setDroppedItems(parsedTemplate.items || []);
@@ -113,9 +136,9 @@ function Builder() {
       console.error('Error retrieving template:', error);
     }
   };
-  
+
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} onDragEnd={handleDragEnd} id={id} >
       <HStack spacing={0} w="100vw" h="100vh" bg="#EBEBEB">
         <Sidebar />
         <VStack w="calc(100% - 360px)" h="100vh" overflow="auto">
