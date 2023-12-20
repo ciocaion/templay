@@ -1,10 +1,16 @@
 import React from "react";
 import { Box, Text } from "@chakra-ui/react";
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 
-function MainButton(_props: any) {
+interface MainButtonProps {
+  text: string;
+  onClick?: () => void;  // Optional onClick handler
+  icon?: React.ReactNode; // Optional icon
+}
+
+function secondarybutton({ text, onClick, icon }: MainButtonProps) {
   return (
     <Box
+      onClick={onClick} // Attach the onClick event
       display="flex"
       justifyContent="center"
       alignItems="center"
@@ -17,7 +23,7 @@ function MainButton(_props: any) {
       borderRadius="50px"
       padding="0 1rem"
       _hover={{ backgroundColor: "#E6E6F8" }} 
-      cursor="pointer" 
+      cursor="pointer"
     >
       <Text
         color="#020281"
@@ -25,11 +31,11 @@ function MainButton(_props: any) {
         fontSize="1rem" 
         fontWeight="semibold"
       >
-        View your templates
+        {text}
       </Text>
-      <VisibilityOutlinedIcon style={{ color: '#020281' }} />
+      {icon && <Box ml="0px" display="flex" alignItems="center">{icon}</Box>}
     </Box>
   );
 }
 
-export default MainButton;
+export default secondarybutton;

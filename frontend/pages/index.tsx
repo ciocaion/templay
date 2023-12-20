@@ -1,6 +1,7 @@
 import React from 'react';
 import MainButton from '../components/ui/primarybutton'; 
-import SecondButton from '../components/ui/secondarybutton'; 
+import SecondaryButton from '../components/ui/secondarybutton'; 
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import styles from '../styles/home.module.css';
 import Link from 'next/link';
 
@@ -24,7 +25,10 @@ export default function Home() {
           <Link href="/builder" passHref>
             <MainButton />
           </Link>
-          <SecondButton />
+          <SecondaryButton 
+           text="View Templates"
+           icon={<VisibilityOutlinedIcon  style={{ color: '#020281' }} />} // Replace with your desired icon
+          />
           </div>
         </div> 
         </div>  );  

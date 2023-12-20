@@ -1,68 +1,115 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Grid, GridItem } from '@chakra-ui/react';
-import { useDroppable } from '@dnd-kit/core';
+import { Box, Grid, GridItem, Button } from '@chakra-ui/react';
 import Banner from './banner'; 
 import Hero from './hero';  
-import PageContent from './pagecontent';
-import ImageBlock from './image';
-
+import Sidebar from '../layout/sidebar';
+import {DraggableItem, DraggableItems} from '../../pages/builder';
 export type GridLayoutType = 'twoColumnEqual' | 'twoColumnWideLeft' | 'twoColumnWideRight' | 'threeColumnEqual' | 'singleColumn' | string;
 
-interface DraggableItem {
-  id: string;
-  type: string;
-  layoutType?: GridLayoutType;
-}
 
 interface GridComponentProps {
-  layout: GridLayoutType;
-  items: { [key: string]: DraggableItem[] };
-  onDrop: (droppableId: string, draggableId: string, draggableItem: DraggableItem) => void;
+  id: string;
+  layout: GridLayoutType | undefined;
+  items: DraggableItems
+  appendChildren: (id: string, newItems: DraggableItems, columnId?: string) => void;
+  onComponentAdd: (type: string, layoutType: GridLayoutType, gridId: string) => void; // New prop for adding components
 }
 
-const GridComponent: React.FC<GridComponentProps> = ({ layout, items, onDrop }) => {
-  // Maintain a state object to store dropped items for each grid type
-  const [droppedGrids, setDroppedGrids] = useState<{ [key: string]: string[] }>({});
+const GridComponent: React.FC<GridComponentProps> = ({id: gridId, layout, items =[], onComponentAdd, appendChildren }) => {
 
-  // Use useDroppable to make the GridComponent a drop target
-  const { setNodeRef: gridRef, isOver } = useDroppable({ id: `grid-${layout}` });
+  console.log('grid_items', items);
 
-  const renderDroppableGridItem = (key: number) => {
-    const droppableId = `droppable-${layout}-${key}`;
-    const { setNodeRef, isOver: itemIsOver } = useDroppable({ id: droppableId });
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const droppedItems = items[droppableId] || [];
 
-    console.log("Rendering Droppable Grid Item", droppableId);
+  const [currentColumn, setCurrentColumn] = useState('');
+
+  useEffect(() => {
+    if (!items.length) {
+      renderGridItems()
+    }
+  }, [items])
+
+  const handleComponentSelection = (componentType: string, layoutType?: GridLayoutType) => {
+
+    console.log(componentType, layoutType);
+    const newComponentId = `component-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const newComponent = { id: newComponentId, type: componentType, layoutType: layoutType, children: [] };
+
+    console.log("new component", newComponent)
+    appendChildren(gridId, [newComponent], currentColumn);
+    setIsModalOpen(false); // Close the modal after selection
+    setCurrentColumn('');
+  };
+
+
+
+ 
+
+
+
+  const renderGridItem = (item: DraggableItem) => {
+    const {id, children} = item;
+
 
     return (
-      <GridItem ref={setNodeRef} key={key} border="2px dashed #020281" p={40} bg={itemIsOver ? 'lightgray' : 'white'}>
-        {droppedItems.map((item) => {
-          // Render different components based on item type
+      <GridItem key={id} border="2px dashed #020281" p={40} bg="white">
+        {children.map((item) => {
           switch (item.type) {
             case 'BANNER':
-              return <Banner key={item.id} width="100%" />;
+              return <Banner key={item.id} />;
             case 'HERO':
               return <Hero key={item.id} />;
             default:
               return <div key={item.id}>{item.type}</div>;
           }
         })}
+
+        <Sidebar 
+              isOpen={isModalOpen} 
+              onClose={() => setIsModalOpen(false)}
+              
+              onSelect={handleComponentSelection} // Pass the function here
+              />
+        <Button onClick={() => {
+          setIsModalOpen(true);
+          setCurrentColumn(item.id)
+        }}
+        >Select components</Button>
+
       </GridItem>
     );
   };
 
   const renderGridItems = () => {
-    const numberOfColumns = {
+    const layoutMapping  = {
       'twoColumnEqual': 2,
       'twoColumnWideLeft': 2,
       'twoColumnWideRight': 2,
       'threeColumnEqual': 3,
       'singleColumn': 1,
-    }[layout] || 1;
+    };
 
-    return Array.from({ length: numberOfColumns }, (_, index) => renderDroppableGridItem(index));
-  };
+    const safeLayout = layout as keyof typeof layoutMapping;
+
+
+    const numberOfColumns = layoutMapping[safeLayout] ?? 1; // Default to 1 if layout is not found
+
+
+    const newComponents = [];
+
+    for (let i=0; i < numberOfColumns;i++) {
+      newComponents.push({
+        id: `${gridId}-column-${i}`,
+        type: "undefined",
+        children: [],
+        layoutType: "undefined",
+      });
+    }
+
+    appendChildren(gridId, newComponents);
+
+      };
 
   const gridTemplateColumns = {
     'twoColumnEqual': 'repeat(2, 1fr)',
@@ -70,33 +117,19 @@ const GridComponent: React.FC<GridComponentProps> = ({ layout, items, onDrop }) 
     'twoColumnWideRight': '1fr 2fr',
     'threeColumnEqual': 'repeat(3, 1fr)',
     'singleColumn': '1fr',
-  }[layout] || '1fr';
-
-  // Clear the dropped items state for the current grid type
-  useEffect(() => {
-    console.log('layout changed to:', layout);
-    if (droppedGrids[layout]) {
-      console.log('Clearing dropped items for layout:', layout);
-      setDroppedGrids((prevDroppedGrids) => ({ ...prevDroppedGrids, [layout]: [] }));
-    }
-  }, [layout]);
-
-  console.log('isOver:', isOver);
-  console.log('droppedGrids:', droppedGrids);
+  }[layout || 'singleColumn'];
 
   return (
     <Box>
-      {/* Use gridRef as the ref for the GridComponent */}
       <Grid
-        ref={gridRef}
         templateColumns={gridTemplateColumns}
         gap={4}
         margin="32px"
         padding="0px"
         overflow="hidden"
-        bg={isOver ? 'lightgray' : 'white'}
+        bg="white"
       >
-        {renderGridItems()}
+        {items.map(item => renderGridItem(item))}
       </Grid>
     </Box>
   );

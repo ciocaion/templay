@@ -1,30 +1,33 @@
 import React from 'react';
-import { useDroppable } from '@dnd-kit/core'; 
 import Banner from './banner';
 import Hero from './hero';
 import GridComponent from './gridcomponent';
 import { GridLayoutType } from './gridcomponent';
-import { DraggableItem } from '../../types'
 import PageContent from './pagecontent';
 import RichText from './richtext';
 import ImageBlock from './image';
+import SecondaryButton from '../ui/secondarybutton'; 
+import AddCircleOutlineIcon  from '@mui/icons-material/VisibilityOutlined';
+import {DraggableItems, DraggableItem} from "../../pages/builder"
 
-export interface TemplateItem {
-  id: string;
-  type: string;
-  layoutType?: GridLayoutType;
-}
+
+// export interface TemplateItem {
+//   id: string;
+//   type: string;
+//   layoutType?: GridLayoutType;
+// }
 
 interface TemplateAreaProps {
-  items: TemplateItem[];
-  gridItems: { [key: string]: DraggableItem[] };
-  onDrop: (droppableId: string, draggableId: string, draggableItem: TemplateItem) => void;
+  items: DraggableItems;
+  openModal: () => void; // Add openModal prop
+  onComponentAdd: (type: string, layoutType: GridLayoutType, gridId: string) => void;
+  appendChildren: (id: string, items: DraggableItems, columnId?: string) => void;
 }
 
-const TemplateArea: React.FC<TemplateAreaProps> = ({ items, gridItems, onDrop }) => {
-  const { setNodeRef } = useDroppable({ id: 'droppable' });
+const TemplateArea: React.FC<TemplateAreaProps> = ({items,openModal, onComponentAdd, appendChildren  }) => {
 
-  const renderItem = (item: TemplateItem, index: number) => {
+
+  const renderItem = (item: DraggableItem, index: number) => {
     const key = item.type === 'GRID' ? `GRID-${index}` : item.id;
 
     switch (item.type) {
@@ -33,20 +36,15 @@ const TemplateArea: React.FC<TemplateAreaProps> = ({ items, gridItems, onDrop })
       case 'HERO':
         return <Hero key={key} />;
       case 'GRID':
-        console.log('Passing onDrop to GridComponent', onDrop);
         return (
-          <div key={key}>
-            {item.layoutType && 
-              <GridComponent 
-                layout={item.layoutType} 
-                items={gridItems}
-                onDrop={(droppableId, draggableId, draggableItem) => {
-                  console.log('Dropping onto GRID:', droppableId, draggableId, draggableItem);
-                  onDrop(droppableId, draggableId, draggableItem);
-                }} 
-              />
-            }
-          </div>
+          <GridComponent 
+            key={`GRID-${index}`}
+            id={item.id}
+            layout={item.layoutType }
+            items={item.children}
+            appendChildren={appendChildren}
+            onComponentAdd={onComponentAdd}  // Pass the function to GridComponent
+          />
         );
       case 'PAGE':
         return <PageContent key={key} />;
@@ -59,10 +57,8 @@ const TemplateArea: React.FC<TemplateAreaProps> = ({ items, gridItems, onDrop })
     }
   };
 
-
   return (
     <div
-      ref={setNodeRef}
       style={{
         width: '60vw',
         minHeight: '100vh',
@@ -75,6 +71,24 @@ const TemplateArea: React.FC<TemplateAreaProps> = ({ items, gridItems, onDrop })
       }}
     >
       {items.map((item, index) => renderItem(item, index))}
+      
+      {/* Placeholder with Add Component Button */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        border: '2px dashed #cccccc',
+        borderRadius: '4px',
+        padding: '20px',
+        margin: '10px',
+        textAlign: 'center'
+      }}>
+         <SecondaryButton
+          text="Add new component"
+          icon={<AddCircleOutlineIcon style={{ color: '#020281' }} />}
+          onClick={openModal} // Use the openModal function here
+        />
+
+      </div>
     </div>
   );
 }

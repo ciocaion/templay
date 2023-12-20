@@ -2,7 +2,6 @@
 import React, { useEffect, useId } from 'react';
 import { AppProps } from 'next/app';
 import { ChakraProvider } from '@chakra-ui/react';
-import { DndContext } from '@dnd-kit/core';
 
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -19,9 +18,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 
   return (
     <ChakraProvider>
-      <DndContext id={id} >
         <Component {...pageProps} />
-      </DndContext>
     </ChakraProvider>
   );
 }
