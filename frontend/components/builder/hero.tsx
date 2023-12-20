@@ -1,27 +1,15 @@
 import React from 'react';
 import { Box, Editable, EditablePreview, EditableInput, Flex } from '@chakra-ui/react';
-import { useDraggable } from '@dnd-kit/core';
 
 function Hero() {
-  const {attributes, listeners, setNodeRef} = useDraggable({
-    id: 'hero',
-    data: { type: 'HERO' },
-  });
-
   return (
     <Box
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
       w="100%"
       h="375px"
       bg="#020281"
       marginBottom="32px"
     >
-      <Flex
-      w="100%" 
-      h="100%"
-      >
+      <Flex w="100%" h="100%">
         <Box w="50%" p="20px" color="white">
           <Editable defaultValue="Header" fontSize="2xl">
             <EditablePreview />
