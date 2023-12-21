@@ -1,13 +1,13 @@
 import React from "react";
 import { Box, Text } from "@chakra-ui/react";
 
-interface MainButtonProps {
+interface SecondButtonProps {
   text: string;
   onClick?: () => void;  // Optional onClick handler
   icon?: React.ReactNode; // Optional icon
 }
 
-function secondarybutton({ text, onClick, icon }: MainButtonProps) {
+function SecondaryButton({ text, onClick, icon }: SecondButtonProps) {
   return (
     <Box
       onClick={onClick} // Attach the onClick event
@@ -38,4 +38,4 @@ function secondarybutton({ text, onClick, icon }: MainButtonProps) {
   );
 }
 
-export default secondarybutton;
+export default SecondaryButton;
