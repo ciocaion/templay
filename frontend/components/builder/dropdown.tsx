@@ -1,5 +1,5 @@
 import React from 'react';
-import { Accordion, AccordionItem, AccordionButton, AccordionPanel, Box}  from '@chakra-ui/react';
+import { Accordion, AccordionItem, AccordionButton, AccordionPanel, Box, Tooltip}  from '@chakra-ui/react';
 
 interface CustomDropdownProps {
   buttonLabel: string; // Label for the AccordionButton
@@ -10,10 +10,11 @@ interface CustomDropdownProps {
 
 function CustomDropdown({ buttonLabel, menuItems, isOpen, onToggle }: CustomDropdownProps) {
     return (
+        
         <Accordion  allowToggle index={isOpen ? 0 : -1} onChange={onToggle}>
-          
             <AccordionItem border="none">
                 <h2>
+                <Tooltip hasArrow label='Click to open' color='141414' bg='#D5EDFF' padding='16px'>
                     <AccordionButton
                         background="none"
                         color="#8C8C8C"
@@ -25,6 +26,7 @@ function CustomDropdown({ buttonLabel, menuItems, isOpen, onToggle }: CustomDrop
                             {buttonLabel}
                         </Box>
                     </AccordionButton>
+                    </Tooltip>
                 </h2>
                 <AccordionPanel pb={4}>
                     {menuItems.map((item, index) => (
