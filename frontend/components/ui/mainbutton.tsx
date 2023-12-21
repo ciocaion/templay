@@ -1,8 +1,14 @@
 import React from "react";
 import { Box, Text } from "@chakra-ui/react";
-import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
 
-function MainButton(_props: any) {
+interface MainButtonProps {
+  text: string;
+  onClick?: () => void;  // Optional onClick handler
+  icon?: React.ReactNode; // Optional icon
+}
+
+
+function MainButton({ text, onClick, icon }: MainButtonProps){
   return (
     <Box
       display="flex"
@@ -18,17 +24,17 @@ function MainButton(_props: any) {
       _hover={{ backgroundColor: "#4F4FCD" }}
       cursor="pointer" 
       textDecor="none"
-      onClick={_props.onClick}
+      onClick={onClick}
     >
       <Text
-        color="white"
+        color="#ffffff"
         textAlign="center"
-        fontSize="1rem"
+        fontSize="1rem" 
         fontWeight="semibold"
       >
-        Start creating
+        {text}
       </Text>
-      <ArrowForwardOutlinedIcon style={{ color: 'white' }} />
+      {icon && <Box ml="0px" display="flex" alignItems="center">{icon}</Box>}
     </Box>
   );
 }

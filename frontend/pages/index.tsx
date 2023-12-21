@@ -2,6 +2,7 @@ import React from 'react';
 import MainButton from '../components/ui/primarybutton'; 
 import SecondaryButton from '../components/ui/secondarybutton'; 
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
 import styles from '../styles/home.module.css';
 import Link from 'next/link';
 
@@ -23,7 +24,9 @@ export default function Home() {
           <h2>GEA Template App</h2>
           <div style={{ marginTop: '20px' }}>
           <Link href="/builder" passHref>
-            <MainButton />
+            <MainButton 
+            icon={<VisibilityOutlinedIcon  style={{ color: '#020281' }} />}
+            />
           </Link>
           <SecondaryButton 
            text="View Templates"

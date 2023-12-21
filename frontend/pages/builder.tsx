@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/layout/modal';
 import TemplateArea from '../components/builder/templatearea';
 import { GridLayoutType } from '../components/builder/gridcomponent';
-import { HStack, VStack } from '@chakra-ui/react';
+import { Box, HStack, VStack } from '@chakra-ui/react';
+import MainButton from '@/components/ui/mainbutton';
+import SecondaryButton from '@/components/ui/secondarybutton';
 
 export interface DraggableItem {
   id: string;
@@ -127,8 +129,10 @@ function Builder() {
   
  return (
     <HStack spacing={0} w="100vw" h="100vh" bg="#EBEBEB">
-      <button onClick={handleSaveTemplate}>Save Template</button>
-      <button onClick={() => handleRetrieveTemplate('14')}>Retrieve Template</button>
+      <Box padding='16px'>
+      <MainButton text="Save Template" onClick={handleSaveTemplate}/>
+      <SecondaryButton text="Retrieve Template" onClick={() => handleRetrieveTemplate('14')}/>
+      </Box>
       <VStack w="100%" h="100vh" overflow="auto">
       <TemplateArea 
       items={droppedItems} openModal={openModal} 
