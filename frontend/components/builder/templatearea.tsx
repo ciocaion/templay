@@ -7,60 +7,76 @@ import PageContent from './pagecontent';
 import RichText from './richtext';
 import ImageBlock from './image';
 import SecondaryButton from '../ui/secondarybutton'; 
-import AddCircleOutlineIcon  from '@mui/icons-material/VisibilityOutlined';
-import {DraggableItems, DraggableItem} from "../../pages/builder"
-
-
-// export interface TemplateItem {
-//   id: string;
-//   type: string;
-//   layoutType?: GridLayoutType;
-// }
+import AddCircleOutlineIcon  from '@mui/icons-material/AddCircleOutline';
+import DeleteIcon from '@mui/icons-material/Delete'; 
+import { DraggableItems, DraggableItem } from "../../pages/builder"
 
 interface TemplateAreaProps {
   items: DraggableItems;
-  openModal: () => void; // Add openModal prop
+  openModal: () => void;
   onComponentAdd: (type: string, layoutType: GridLayoutType, gridId: string) => void;
   appendChildren: (id: string, items: DraggableItems, columnId?: string) => void;
+  onDelete: (itemId: string) => void;
 }
 
-const TemplateArea: React.FC<TemplateAreaProps> = ({items,openModal, onComponentAdd, appendChildren  }) => {
-
+const TemplateArea: React.FC<TemplateAreaProps> = ({ items, openModal, onComponentAdd, appendChildren, onDelete }) => {
 
   const renderItem = (item: DraggableItem, index: number) => {
     const key = item.type === 'GRID' ? `GRID-${index}` : item.id;
 
+    const deleteButton = (
+      <button
+      onClick={() => onDelete(item.id)}
+        style={{display:'flex', justifyContent:'center',background:'white', position: 'absolute', top: 10, right: 10, zIndex: 10 }} // Adjust styling as needed
+      >
+        <DeleteIcon /> {/* Use an X icon or text */}
+      </button>
+    );
+
+    let component;
     switch (item.type) {
       case 'BANNER':
-        return <Banner key={key} />;
+        component = <Banner key={key} />;
+        break;
       case 'HERO':
-        return <Hero key={key} />;
+        component = <Hero key={key} />;
+        break;
       case 'GRID':
-        return (
+        component = (
           <GridComponent 
             key={`GRID-${index}`}
             id={item.id}
-            layout={item.layoutType }
+            layout={item.layoutType}
             items={item.children}
             appendChildren={appendChildren}
-            onComponentAdd={onComponentAdd}  // Pass the function to GridComponent
+            onComponentAdd={onComponentAdd}
           />
         );
+        break;
       case 'PAGE':
-        return <PageContent key={key} />;
+        component = <PageContent key={key} />;
+        break;
       case 'TEXT':
-        return <RichText key={key} />;
+        component = <RichText key={key} />;
+        break;
       case 'IMAGE':
         return <ImageBlock key={key} />;
       default:
-        return null;
+        component = null;
     }
+
+    return (
+      <div key={key} style={{ position: 'relative' }}>
+        {component}
+        {deleteButton}
+      </div>
+    );
   };
 
   return (
     <div
       style={{
-        width: '60vw',
+        width: '80vw',
         minHeight: '100vh',
         marginTop: '24px',
         marginBottom: '24px',
@@ -71,8 +87,6 @@ const TemplateArea: React.FC<TemplateAreaProps> = ({items,openModal, onComponent
       }}
     >
       {items.map((item, index) => renderItem(item, index))}
-      
-      {/* Placeholder with Add Component Button */}
       <div style={{
         display: 'flex',
         justifyContent: 'center',
@@ -82,12 +96,11 @@ const TemplateArea: React.FC<TemplateAreaProps> = ({items,openModal, onComponent
         margin: '10px',
         textAlign: 'center'
       }}>
-         <SecondaryButton
+        <SecondaryButton
           text="Add new component"
           icon={<AddCircleOutlineIcon style={{ color: '#020281' }} />}
-          onClick={openModal} // Use the openModal function here
+          onClick={openModal}
         />
-
       </div>
     </div>
   );

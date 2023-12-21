@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../components/layout/sidebar';
+import Sidebar from '../components/layout/modal';
 import TemplateArea from '../components/builder/templatearea';
 import { GridLayoutType } from '../components/builder/gridcomponent';
 import { HStack, VStack } from '@chakra-ui/react';
@@ -62,6 +62,15 @@ function Builder() {
     console.log(droppedItems) 
   };
 
+  
+  // Function to handle component deletion
+  const handleDelete = (itemId: string) => {
+    // Filter out the item with the specified id
+    const updatedItems = droppedItems.filter(item => item.id !== itemId);
+    // Update the state with the new items array
+    setDroppedItems(updatedItems);
+  };
+
   const handleSaveTemplate = async () => {
     try {
       const templateData = {
@@ -119,11 +128,15 @@ function Builder() {
  return (
     <HStack spacing={0} w="100vw" h="100vh" bg="#EBEBEB">
       <button onClick={handleSaveTemplate}>Save Template</button>
-      <button onClick={() => handleRetrieveTemplate('8')}>Retrieve Template</button>
-      <VStack w="calc(100% - 360px)" h="100vh" overflow="auto">
-      <TemplateArea items={droppedItems} openModal={openModal} appendChildren={appendChildren} onComponentAdd={function (type: string, layoutType: string, gridId: string): void {
+      <button onClick={() => handleRetrieveTemplate('14')}>Retrieve Template</button>
+      <VStack w="100%" h="100vh" overflow="auto">
+      <TemplateArea 
+      items={droppedItems} openModal={openModal} 
+      appendChildren={appendChildren} 
+      onDelete={handleDelete} 
+      onComponentAdd={function (type: string, layoutType: string, gridId: string): void {
          throw new Error('Function not implemented.');
-       } } />
+       }} />
       </VStack>
       <Sidebar 
       isOpen={isModalOpen} 

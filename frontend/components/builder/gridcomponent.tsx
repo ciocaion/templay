@@ -2,33 +2,33 @@ import React, { useState, useEffect } from 'react';
 import { Box, Grid, GridItem, Button } from '@chakra-ui/react';
 import Banner from './banner'; 
 import Hero from './hero';  
-import Sidebar from '../layout/sidebar';
-import {DraggableItem, DraggableItems} from '../../pages/builder';
-export type GridLayoutType = 'twoColumnEqual' | 'twoColumnWideLeft' | 'twoColumnWideRight' | 'threeColumnEqual' | 'singleColumn' | string;
+import PageContent from './pagecontent';
+import GridModal from '../layout/modalGrid'; // Import the new modal component
+import { DraggableItem, DraggableItems } from '../../pages/builder';
 
+export type GridLayoutType = 'twoColumnEqual' | 'twoColumnWideLeft' | 'twoColumnWideRight' | 'threeColumnEqual' | 'singleColumn' | string;
 
 interface GridComponentProps {
   id: string;
   layout: GridLayoutType | undefined;
-  items: DraggableItems
+  items: DraggableItems;
   appendChildren: (id: string, newItems: DraggableItems, columnId?: string) => void;
-  onComponentAdd: (type: string, layoutType: GridLayoutType, gridId: string) => void; // New prop for adding components
+  onComponentAdd: (type: string, layoutType: GridLayoutType, gridId: string) => void;
 }
 
-const GridComponent: React.FC<GridComponentProps> = ({id: gridId, layout, items =[], onComponentAdd, appendChildren }) => {
-
-  console.log('grid_items', items);
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-
+const GridComponent: React.FC<GridComponentProps> = ({ id: gridId, layout, items = [], appendChildren }) => {
+  // Existing state and hooks
+  const [isModalOpen, setIsModalOpen] = useState(false);  
   const [currentColumn, setCurrentColumn] = useState('');
+
+  // New state for the new modal
+  const [isNewModalOpen, setIsNewModalOpen] = useState(false);
 
   useEffect(() => {
     if (!items.length) {
-      renderGridItems()
+      renderGridItems();
     }
-  }, [items])
+  }, [items]);
 
   const handleComponentSelection = (componentType: string, layoutType?: GridLayoutType) => {
 
@@ -39,13 +39,9 @@ const GridComponent: React.FC<GridComponentProps> = ({id: gridId, layout, items 
     console.log("new component", newComponent)
     appendChildren(gridId, [newComponent], currentColumn);
     setIsModalOpen(false); // Close the modal after selection
+    setIsNewModalOpen(false);
     setCurrentColumn('');
   };
-
-
-
- 
-
 
 
   const renderGridItem = (item: DraggableItem) => {
@@ -60,12 +56,14 @@ const GridComponent: React.FC<GridComponentProps> = ({id: gridId, layout, items 
               return <Banner key={item.id} />;
             case 'HERO':
               return <Hero key={item.id} />;
+              case 'PAGE':
+                return <PageContent key={item.id} />;
             default:
               return <div key={item.id}>{item.type}</div>;
           }
         })}
 
-        <Sidebar 
+        <GridModal 
               isOpen={isModalOpen} 
               onClose={() => setIsModalOpen(false)}
               
@@ -115,9 +113,10 @@ const GridComponent: React.FC<GridComponentProps> = ({id: gridId, layout, items 
     'twoColumnEqual': 'repeat(2, 1fr)',
     'twoColumnWideLeft': '2fr 1fr',
     'twoColumnWideRight': '1fr 2fr',
-    'threeColumnEqual': 'repeat(3, 1fr)',
+    'threeColumnEqual': 'repeat(3, 477px)',
     'singleColumn': '1fr',
   }[layout || 'singleColumn'];
+  
 
   return (
     <Box>
@@ -131,6 +130,13 @@ const GridComponent: React.FC<GridComponentProps> = ({id: gridId, layout, items 
       >
         {items.map(item => renderGridItem(item))}
       </Grid>
+
+      {/* The new modal for selecting components */}
+      <GridModal
+        isOpen={isNewModalOpen}
+        onClose={() => setIsNewModalOpen(false)}
+        onSelect={handleComponentSelection}
+      />
     </Box>
   );
 };
