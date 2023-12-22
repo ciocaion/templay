@@ -6,6 +6,7 @@ import PageContent from './pagecontent';
 import GridModal from '../layout/modalGrid'; // Import the new modal component
 import { DraggableItem, DraggableItems } from '../../pages/builder';
 
+
 export type GridLayoutType = 'twoColumnEqual' | 'twoColumnWideLeft' | 'twoColumnWideRight' | 'threeColumnEqual' | 'singleColumn' | string;
 
 interface GridComponentProps {
@@ -20,9 +21,10 @@ const GridComponent: React.FC<GridComponentProps> = ({ id: gridId, layout, items
   // Existing state and hooks
   const [isModalOpen, setIsModalOpen] = useState(false);  
   const [currentColumn, setCurrentColumn] = useState('');
-
   // New state for the new modal
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+   // State to track if a component has been added to each grid item
+   const [componentAdded, setComponentAdded] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
     if (!items.length) {
@@ -35,6 +37,8 @@ const GridComponent: React.FC<GridComponentProps> = ({ id: gridId, layout, items
     console.log(componentType, layoutType);
     const newComponentId = `component-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const newComponent = { id: newComponentId, type: componentType, layoutType: layoutType, children: [] };
+     // Update the state to indicate that a component has been added
+     setComponentAdded(prev => ({ ...prev, [currentColumn]: true }));
 
     console.log("new component", newComponent)
     appendChildren(gridId, [newComponent], currentColumn);
@@ -49,7 +53,7 @@ const GridComponent: React.FC<GridComponentProps> = ({ id: gridId, layout, items
 
 
     return (
-      <GridItem key={id} border="2px dashed #020281" p={40} bg="white">
+      <GridItem key={id} border="2px dashed #020281" p={12} bg="white">
         {children.map((item) => {
           switch (item.type) {
             case 'BANNER':
@@ -69,12 +73,14 @@ const GridComponent: React.FC<GridComponentProps> = ({ id: gridId, layout, items
               
               onSelect={handleComponentSelection} // Pass the function here
               />
-        <Button onClick={() => {
-          setIsModalOpen(true);
-          setCurrentColumn(item.id)
-        }}
-        >Select components</Button>
-
+        {!componentAdded[item.id] && (
+          <Button onClick={() => {
+            setIsModalOpen(true);
+            setCurrentColumn(item.id)
+          }}>
+            Select components
+          </Button>
+        )}
       </GridItem>
     );
   };
@@ -113,9 +119,10 @@ const GridComponent: React.FC<GridComponentProps> = ({ id: gridId, layout, items
     'twoColumnEqual': 'repeat(2, 1fr)',
     'twoColumnWideLeft': '2fr 1fr',
     'twoColumnWideRight': '1fr 2fr',
-    'threeColumnEqual': 'repeat(3, 477px)',
+    'threeColumnEqual': 'repeat(3, 472px)',
     'singleColumn': '1fr',
   }[layout || 'singleColumn'];
+
   
 
   return (

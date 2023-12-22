@@ -131,7 +131,7 @@ function Builder() {
     <HStack spacing={0} w="100vw" h="100vh" bg="#EBEBEB">
       <Box padding='16px'>
       <MainButton text="Save Template" onClick={handleSaveTemplate}/>
-      <SecondaryButton text="Retrieve Template" onClick={() => handleRetrieveTemplate('14')}/>
+      <SecondaryButton text="Retrieve Template" onClick={() => handleRetrieveTemplate('15')}/>
       </Box>
       <VStack w="100%" h="100vh" overflow="auto">
       <TemplateArea 

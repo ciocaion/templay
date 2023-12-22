@@ -8,7 +8,7 @@ import RichText from './richtext';
 import ImageBlock from './image';
 import SecondaryButton from '../ui/secondarybutton'; 
 import AddCircleOutlineIcon  from '@mui/icons-material/AddCircleOutline';
-import DeleteIcon from '@mui/icons-material/Delete'; 
+import Cancel from '@mui/icons-material/Cancel'; 
 import { DraggableItems, DraggableItem } from "../../pages/builder"
 
 interface TemplateAreaProps {
@@ -27,9 +27,9 @@ const TemplateArea: React.FC<TemplateAreaProps> = ({ items, openModal, onCompone
     const deleteButton = (
       <button
       onClick={() => onDelete(item.id)}
-        style={{display:'flex', justifyContent:'center',background:'white', position: 'absolute', top: 10, right: 10, zIndex: 10 }} // Adjust styling as needed
+        style={{display:'flex', justifyContent:'center',color:'red', position: 'absolute', top: 10, right: 10, zIndex: 10 }} // Adjust styling as needed
       >
-        <DeleteIcon /> {/* Use an X icon or text */}
+        <Cancel /> {/* Use an X icon or text */}
       </button>
     );
 

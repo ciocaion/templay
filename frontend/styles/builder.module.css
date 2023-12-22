@@ -20,6 +20,7 @@
   
   .TWO_COLUMN_WIDE_LEFT {
     grid-template-columns: 2fr 1fr;
+    padding: 12px;
   }
   
   .TWO_COLUMN_WIDE_RIGHT {
