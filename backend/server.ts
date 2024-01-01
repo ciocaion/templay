@@ -9,9 +9,14 @@ const app = express();
 // Enable All CORS Requests for simplicity, or configure as needed
 app.use(cors());
 
-const port = 4000;
+const port = process.env.PORT || 4000;
 
 app.use(express.json());
+
+app.get('/', (_req, res) => {
+  res.send('Welcome to the API');
+});
+
 
 app.get('/api/test', (_req, res) => {
     res.json({ message: 'Success! Backend is responding.' });
