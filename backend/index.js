@@ -1,1 +1,1 @@
-import "./bin/www";
+import './server';
