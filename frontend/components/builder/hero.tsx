@@ -5,12 +5,12 @@ function Hero() {
   return (
     <Box
       w="100%"
-      h="375px"
+      h="475px"
       bg="#020281"
-      marginBottom="32px"
+      marginBottom="32px auto"
     >
       <Flex w="100%" h="100%">
-        <Box w="50%" p="20px" color="white">
+        <Box w="50%" p="32px" color="white">
           <Editable defaultValue="Header" fontSize="2xl">
             <EditablePreview />
             <EditableInput />
