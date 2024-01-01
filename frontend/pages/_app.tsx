@@ -10,7 +10,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 
 
   useEffect(() => {
-    fetch('http://localhost:4000/api') // Update with your backend URL and port
+    fetch('https://templay-backend.vercel.app/api') // Update with your backend URL and port
       .then(response => response.json())
       .then(data => console.log('Response from backend:', data))
       .catch(error => console.error('Error fetching data:', error));
