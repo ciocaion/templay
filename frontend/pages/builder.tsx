@@ -79,7 +79,7 @@ function Builder() {
         items: droppedItems,
       };
 
-      const response = await fetch('http://localhost:4000/api/templates', {
+      const response = await fetch('https://templay-backend.vercel.app/api/templates', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -101,7 +101,7 @@ function Builder() {
   const handleRetrieveTemplate = async (templateId:string) => {
     try {
       // Fetch the array of templates from the API
-      const response = await fetch(`http://localhost:4000/api`);
+      const response = await fetch(`https://templay-backend.vercel.app/api`);
   
       if (!response.ok) {
         throw new Error('Network response was not ok');
