@@ -1,20 +1,12 @@
 import React from 'react';
 import { Box, Editable, EditablePreview, EditableInput, Flex } from '@chakra-ui/react';
-import { useDraggable } from '@dnd-kit/core';
 
-function PageContent() {
-  const {attributes, listeners, setNodeRef} = useDraggable({
-    id: 'page',
-    data: { type: 'PAGE' },
-  });
+function PageContent({ width = '90%' }) {
 
   return (
     <Flex justifyContent="center">
     <Box
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      w="100%"
+      w={width}
       h="475px" // Adjusted height to accommodate both image and text
       bg="#020281"
       margin="32px auto"

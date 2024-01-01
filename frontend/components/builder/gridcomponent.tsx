@@ -53,7 +53,7 @@ const GridComponent: React.FC<GridComponentProps> = ({ id: gridId, layout, items
 
 
     return (
-      <GridItem key={id} border="2px dashed #020281" p={12} bg="white">
+      <GridItem key={id} border="2px dashed #020281" p={0} bg="white">
         {children.map((item) => {
           switch (item.type) {
             case 'BANNER':
