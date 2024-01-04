@@ -2,6 +2,7 @@ import express from 'express';
 import db from './db'; // Import the database connection
 import cors from 'cors';
 import * as mysql from 'mysql2';
+import { MysqlError } from 'mysql';
 
 
 const app = express();
@@ -23,12 +24,12 @@ app.get('/api/test', (_req, res) => {
   });
 
   app.post('/api/templates', (req, res) => {
-    console.log('Received template data:', req.body);
-    const templateData = req.body;
+    console.log('Received data:', req.body);
+    const { items, title } = req.body;
   
-    const sql = `INSERT INTO templates (template_json) VALUES (?)`;
+    const sql = `INSERT INTO templates (template_json, title) VALUES (?, ?)`;
   
-    db.query(sql, [JSON.stringify(templateData)], (err: { message: any; }, result: unknown) => {
+    db.query(sql, [JSON.stringify(items), title], (err: MysqlError | null, result: mysql.OkPacket) => {
       if (err) {
         console.error('Error saving template:', err);
         res.status(500).json({ error: err.message });
@@ -43,11 +44,11 @@ app.get('/api/test', (_req, res) => {
   });
   
   
-  app.get('/api/templates/:id', (req, res) => {
-    const templateId = req.params.id;
-    const sql = 'SELECT * FROM templates WHERE template_id = 2';
-  
-    db.query(sql, [templateId], (err: { message: any; }, result: string | any[]) => {
+  app.get('/api/templates/:title', (req, res) => {
+    const { title } = req.params;
+    const sql = 'SELECT * FROM templates WHERE title = ?';
+
+    db.query(sql, [title], (err: { message: any; }, result: string | any[]) => {
       if (err) {
         console.error('Error fetching template:', err);
         res.status(500).json({ error: err.message });

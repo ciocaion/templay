@@ -23,15 +23,11 @@ export default function Home() {
           <h1>Welcome to test</h1>
           <h2>GEA Template App</h2>
           <div style={{ marginTop: '20px' }}>
-          <Link href="/builder" passHref>
+          <Link href="/dashboard" passHref>
             <MainButton 
             icon={<VisibilityOutlinedIcon  style={{ color: '#020281' }} />}
             />
           </Link>
-          <SecondaryButton 
-           text="View Templates"
-           icon={<VisibilityOutlinedIcon  style={{ color: '#020281' }} />} // Replace with your desired icon
-          />
           </div>
         </div> 
         </div>  );  

@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Box, HStack, VStack, Modal,
+  ModalOverlay, ModalContent, ModalHeader,
+  ModalFooter, ModalBody, ModalCloseButton,
+  Button, Input, useDisclosure
+} from '@chakra-ui/react';
 import Sidebar from '../components/layout/modal';
 import TemplateArea from '../components/builder/templatearea';
 import { GridLayoutType } from '../components/builder/gridcomponent';
-import { Box, HStack, VStack } from '@chakra-ui/react';
 import MainButton from '@/components/ui/mainbutton';
 import SecondaryButton from '@/components/ui/secondarybutton';
 
@@ -13,10 +18,13 @@ export interface DraggableItem {
   children: DraggableItems
 }
 
-export interface DraggableItems extends Array<DraggableItem>{};
+export interface DraggableItems extends Array<DraggableItem> { };
 
 function Builder() {
   const [droppedItems, setDroppedItems] = useState<DraggableItems>([]);
+  const [title, setTitle] = useState('');
+  const { isOpen: isSaveModalOpen, onOpen: onSaveModalOpen, onClose: onSaveModalClose } = useDisclosure();
+  const { isOpen: isRetrieveModalOpen, onOpen: onRetrieveModalOpen, onClose: onRetrieveModalClose } = useDisclosure();
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
     // Define the function to open the modal
   const openModal = () => {
@@ -75,16 +83,16 @@ function Builder() {
 
   const handleSaveTemplate = async () => {
     try {
-      const templateData = {
-        items: droppedItems,
-      };
-
-      const response = await fetch('https://templay-backend.vercel.app/api/templates', {
+      const templateData = droppedItems; // directly use droppedItems
+  
+      console.log('Sending data:', { items: templateData, title }); // log the data structure
+  
+      const response = await fetch('http://localhost:4000/api/templates', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(templateData)
+        body: JSON.stringify({ items: templateData, title }) // send this structured data
       });
 
       if (!response.ok) {
@@ -93,46 +101,83 @@ function Builder() {
 
       const responseData = await response.json();
       console.log('Save successful:', responseData);
+      onSaveModalClose(); // Close the save modal
     } catch (error) {
       console.error('Error saving template:', error);
     }
   };
 
-  const handleRetrieveTemplate = async (templateId:string) => {
+  const handleRetrieveTemplate = async () => {
     try {
-      // Fetch the array of templates from the API
-      const response = await fetch(`https://templay-backend.vercel.app/api`);
+      const response = await fetch(`http://localhost:4000/api`);
   
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
   
-      // Convert the response to JSON, which should be an array
-      const templatesArray = await response.json();
+      const templates = await response.json();
+      console.log('Retrieved templates:', templates);
   
-      // Find the template with the given templateId
-      const template = templatesArray.find((t: { template_id: number; }) => t.template_id === parseInt(templateId, 10));
+      templates.forEach((template: { template_json: string; }) => {
+        const parsedTemplate = JSON.parse(template.template_json);
+        if (parsedTemplate.title === title) {
+          // Title matches, do something with this template
+          setDroppedItems(parsedTemplate.items || []);
+          // You may want to break the loop or return after finding the right template
+        }
+      });
   
-      if (!template) {
-        throw new Error(`Template with ID ${templateId} not found`);
-      }
+      onRetrieveModalClose(); // Close the retrieve modal
   
-      console.log('Retrieved template:', template);
-  
-      // Parse the template_json field to an object
-      const parsedTemplate = JSON.parse(template.template_json);
-      setDroppedItems(parsedTemplate.items || []);
     } catch (error) {
       console.error('Error retrieving template:', error);
     }
   };
   
+  
  return (
     <HStack spacing={0} w="100vw" h="100vh" bg="#EBEBEB">
       <Box padding='16px'>
-      <MainButton text="Save Template" onClick={handleSaveTemplate}/>
-      <SecondaryButton text="Retrieve Template" onClick={() => handleRetrieveTemplate('15')}/>
+      <MainButton text="Save Template" onClick={onSaveModalOpen}/>
+      <SecondaryButton text="Retrieve Template" onClick={onRetrieveModalOpen} />
       </Box>
+         {/* Save Template Modal */}
+         <Modal isOpen={isSaveModalOpen} onClose={onSaveModalClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Save Template</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Input placeholder="Template Title" value={title} onChange={(e) => setTitle(e.target.value)} />
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={handleSaveTemplate}>
+              Save
+            </Button>
+            <Button variant="ghost" onClick={onSaveModalClose}>Cancel</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Retrieve Template Modal */}
+      <Modal isOpen={isRetrieveModalOpen} onClose={onRetrieveModalClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Retrieve Template</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Input placeholder="Template Title" value={title} onChange={(e) => setTitle(e.target.value)} />
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={handleRetrieveTemplate}>
+              Retrieve
+            </Button>
+            <Button variant="ghost" onClick={onRetrieveModalClose}>Cancel</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       <VStack w="100%" h="100vh" overflow="auto">
       <TemplateArea 
       items={droppedItems} openModal={openModal} 

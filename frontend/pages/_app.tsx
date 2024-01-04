@@ -1,24 +1,27 @@
 "use client";
-import React, { useEffect, useId } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppProps } from 'next/app';
-import { ChakraProvider } from '@chakra-ui/react';
-
+import { ChakraProvider, VStack } from '@chakra-ui/react';
+import Header from '../components/layout/header'; // Ensure correct path
 
 function MyApp({ Component, pageProps }: AppProps) {
+  const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  const id = useId()
-
+  // Function to toggle the sidebar's collapsed state
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!isSidebarCollapsed);
+  };
 
   useEffect(() => {
-    fetch('https://templay-backend.vercel.app/api') // Update with your backend URL and port
-      .then(response => response.json())
-      .then(data => console.log('Response from backend:', data))
-      .catch(error => console.error('Error fetching data:', error));
+    // Fetch data or perform other global side effects here
   }, []);
 
   return (
     <ChakraProvider>
-        <Component {...pageProps} />
+      <VStack spacing={0} align="stretch" minH="100vh">
+        <Header onToggleSidebar={toggleSidebar} />
+        <Component {...pageProps} isSidebarCollapsed={isSidebarCollapsed} />
+      </VStack>
     </ChakraProvider>
   );
 }
