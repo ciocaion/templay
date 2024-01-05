@@ -16,11 +16,15 @@ const Sidebar: React.FC<SidebarProps> = ({ onOpenTutorial, isCollapsed }) => {
   const textStyle = { display: isCollapsed ? 'none' : 'block' };
 
   const handleCreateTemplateClick = () => {
-    window.location.href = '/dashboard'; // Navigate to the dashboard when clicked
+    window.location.href = '/dashboard'; 
   };
 
   const handleAboutClick = () => {
-    window.location.href = '/about'; // Navigate to the about page when clicked
+    window.location.href = '/about'; 
+  };
+
+  const handleComponentsClick = () => {
+    window.location.href = '/components'; 
   };
 
   return (
@@ -66,15 +70,15 @@ const Sidebar: React.FC<SidebarProps> = ({ onOpenTutorial, isCollapsed }) => {
           {isCollapsed ? (
             // Add Tooltip to the icon when collapsed
             <Tooltip label="View Components" placement="right">
-              <AppsIcon style={iconStyle} onClick={onOpenTutorial} />
+              <AppsIcon style={iconStyle} onClick={handleComponentsClick} />
             </Tooltip>
           ) : (
-            <AppsIcon style={iconStyle} onClick={onOpenTutorial} />
+            <AppsIcon style={iconStyle} onClick={handleComponentsClick} />
           )}
           <Text
             style={textStyle}
             fontSize="md"
-            onClick={onOpenTutorial}
+            onClick={handleComponentsClick}
             cursor="pointer"
           >
             View Components

@@ -22,6 +22,10 @@ export interface DraggableItem {
 
 export interface DraggableItems extends Array<DraggableItem> { };
 
+interface BuilderProps {
+  isSidebarCollapsed: boolean;
+}
+
 function Builder() {
   const [droppedItems, setDroppedItems] = useState<DraggableItems>([]);
   const [title, setTitle] = useState('');
@@ -32,6 +36,7 @@ function Builder() {
   const { isOpen: isSaveModalOpen, onOpen: onSaveModalOpen, onClose: onSaveModalClose } = useDisclosure();
   const { isOpen: isRetrieveModalOpen, onOpen: onRetrieveModalOpen, onClose: onRetrieveModalClose } = useDisclosure();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
 
   const openModal = () => {
     setIsModalOpen(true);
