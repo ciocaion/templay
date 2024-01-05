@@ -77,7 +77,7 @@ const TemplateArea: React.FC<TemplateAreaProps> = ({ items, openModal, onCompone
     <div
       style={{
         width: '80vw',
-        minHeight: '100vh',
+        minHeight: '90vh',
         marginTop: '24px',
         marginBottom: '24px',
         border: '1px solid white',

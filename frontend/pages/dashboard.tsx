@@ -45,7 +45,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isSidebarCollapsed }) => {
       />
       <HStack spacing={0}>
         <Sidebar onOpenTutorial={openTutorial} isCollapsed={isSidebarCollapsed} />
-        <Box flex="1" p={4}>
+        <Box flex="1" p={16}>
           {/* General Title */}
           <VStack spacing={4} alignItems="center">
             <Text fontSize="xl" fontWeight="bold" textAlign="center">
@@ -57,7 +57,7 @@ const Dashboard: React.FC<DashboardProps> = ({ isSidebarCollapsed }) => {
           <Flex align="center">
           <Link href="/builder"> {/* Use Link component with the href */}
             <Box
-              p={4}
+              p={16}
               boxShadow="lg"
               borderRadius="lg"
               display="flex"

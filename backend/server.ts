@@ -3,6 +3,7 @@ import db from './db'; // Import the database connection
 import cors from 'cors';
 import * as mysql from 'mysql2';
 import { MysqlError } from 'mysql';
+import { OkPacket } from 'mysql2';
 
 
 const app = express();
@@ -24,24 +25,62 @@ app.get('/api/test', (_req, res) => {
   });
 
   app.post('/api/templates', (req, res) => {
-    console.log('Received data:', req.body);
+    console.log('Received template data:', req.body);
     const { items, title } = req.body;
   
-    const sql = `INSERT INTO templates (template_json, title) VALUES (?, ?)`;
+    // Log the title for debugging
+    console.log(`Checking for existing template with title: '${title}'`);
   
-    db.query(sql, [JSON.stringify(items), title], (err: MysqlError | null, result: mysql.OkPacket) => {
-      if (err) {
-        console.error('Error saving template:', err);
-        res.status(500).json({ error: err.message });
+    // Ensure that 'title' is a string as expected in the JSON structure
+    if (typeof title !== 'string') {
+      console.error('Invalid title format:', title);
+      res.status(400).json({ message: 'Invalid title format.' });
+      return;
+    }
+  
+    // Check if a template with this title already exists in the template_json
+    const checkSql = 'SELECT * FROM templates WHERE JSON_UNQUOTE(JSON_EXTRACT(template_json, "$.title")) = ?';
+    
+    // Log the executed query and parameter
+    console.log(`About to execute check query: ${checkSql} with parameter: ${title}`);
+  
+    db.query(checkSql, [title], (checkErr: mysql.QueryError | null, checkResult: mysql.RowDataPacket[] | mysql.RowDataPacket[][] | OkPacket | OkPacket[], _fields: mysql.FieldPacket[] | mysql.FieldPacket[][]) => {
+      console.log('Query callback entered');
+  
+      if (checkErr) {
+        console.error('Error checking for existing template:', checkErr);
+        res.status(500).json({ error: checkErr.message });
         return;
       }
   
-      // Use type assertion for OkPacket
-      const insertResult = result as unknown as mysql.OkPacket;
-      console.log('Template saved:', insertResult);
-      res.status(200).json({ message: 'Template saved successfully', templateId: insertResult.insertId });
+      console.log('Check result:', checkResult);
+      console.log('Before checking if template exists');
+  
+      if (Array.isArray(checkResult) && checkResult.length > 0) {
+        console.log('Template with this title already exists:', title);
+        res.status(409).json({ message: 'A template with this title already exists.' });
+        return;
+      }
+  
+      // Insert the new template since no template with the same title exists
+      const insertSql = `INSERT INTO templates (template_json, title) VALUES (?, ?)`;
+  
+      // Log the insert query and parameters
+      console.log(`Executing insert query: ${insertSql} with parameters:`, JSON.stringify(items), title);
+  
+      db.query(insertSql, [JSON.stringify(items), title], (insertErr: mysql.QueryError | null, insertResult: OkPacket) => {
+        if (insertErr) {
+          console.error('Error saving template:', insertErr);
+          res.status(500).json({ error: insertErr.message });
+          return;
+        }
+  
+        console.log('Template saved successfully:', insertResult);
+        res.status(200).json({ message: 'Template saved successfully', templateId: insertResult.insertId });
+      });
     });
   });
+  
   
   
   app.get('/api/templates/:title', (req, res) => {

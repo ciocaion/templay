@@ -20,7 +20,6 @@ function MainButton({ text, onClick, icon }: MainButtonProps){
       gap="1rem"
       borderRadius="50px"
       padding="0 1rem"
-      marginBottom="24px"
       _hover={{ backgroundColor: "#4F4FCD" }}
       cursor="pointer" 
       textDecor="none"
