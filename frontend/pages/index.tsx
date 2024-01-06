@@ -20,8 +20,12 @@ export default function Home() {
       </div>
 
        <div className={styles.responsiveCard}>
-          <h1>Welcome to test</h1>
-          <h2>GEA Template App</h2>
+       <div style={{fontSize:"24px", textAlign:"center", fontWeight:"bold"}} >
+          Welcome to GEA Templay App
+        </div>
+        <div style={{fontSize:"18px", textAlign:"center", marginBottom:'32px'}}>
+        Where simplicity meets creativity in content design
+        </div>
           <div style={{ marginTop: '20px' }}>
           <Link href="/dashboard" passHref>
             <MainButton 

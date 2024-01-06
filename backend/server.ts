@@ -1,10 +1,6 @@
 import express from 'express';
-import db from './db'; // Import the database connection
+import { getConnection } from './db'; // Import the getConnection function
 import cors from 'cors';
-import * as mysql from 'mysql2';
-import { MysqlError } from 'mysql';
-import { OkPacket } from 'mysql2';
-
 
 const app = express();
 
@@ -12,117 +8,100 @@ const app = express();
 app.use(cors());
 
 const port = process.env.PORT || 4000;
-
 app.use(express.json());
 
-app.get('/', (_req, res) => {
-  res.send('Welcome to the API');
-});
+
+// Test delay route to check connection pool behavior
+// app.get('/api/test-delay', async (_req, res) => {
+//   setTimeout(async () => {
+//     try {
+//       const conn = await getConnection();
+//       const [results] = await conn.query('SELECT 1');
+//       conn.release();
+//       res.json({ message: 'Connection successful after delay', results });
+//     } catch (error) {
+//       console.error('Database error:', error);
+//       res.status(500).json({ error: 'Error executing query' });
+//     }
+//   }, 15 * 60 * 1000); // Delay for 15 minutes
+// });
 
 
-app.get('/api/test', (_req, res) => {
-    res.json({ message: 'Success! Backend is responding.' });
-  });
-
-  app.post('/api/templates', (req, res) => {
-    console.log('Received template data:', req.body);
+app.post('/api/templates', async (req, res) => {
+  try {
     const { items, title } = req.body;
-  
-    // Log the title for debugging
     console.log(`Checking for existing template with title: '${title}'`);
-  
-    // Ensure that 'title' is a string as expected in the JSON structure
+
     if (typeof title !== 'string') {
       console.error('Invalid title format:', title);
       res.status(400).json({ message: 'Invalid title format.' });
       return;
     }
-  
-    // Check if a template with this title already exists in the template_json
+
     const checkSql = 'SELECT * FROM templates WHERE JSON_UNQUOTE(JSON_EXTRACT(template_json, "$.title")) = ?';
+    const conn = await getConnection();
     
-    // Log the executed query and parameter
-    console.log(`About to execute check query: ${checkSql} with parameter: ${title}`);
-  
-    db.query(checkSql, [title], (checkErr: mysql.QueryError | null, checkResult: mysql.RowDataPacket[] | mysql.RowDataPacket[][] | OkPacket | OkPacket[], _fields: mysql.FieldPacket[] | mysql.FieldPacket[][]) => {
-      console.log('Query callback entered');
-  
-      if (checkErr) {
-        console.error('Error checking for existing template:', checkErr);
-        res.status(500).json({ error: checkErr.message });
-        return;
-      }
-  
-      console.log('Check result:', checkResult);
-      console.log('Before checking if template exists');
-  
-      if (Array.isArray(checkResult) && checkResult.length > 0) {
-        console.log('Template with this title already exists:', title);
-        res.status(409).json({ message: 'A template with this title already exists.' });
-        return;
-      }
-  
-      // Insert the new template since no template with the same title exists
-      const insertSql = `INSERT INTO templates (template_json, title) VALUES (?, ?)`;
-  
-      // Log the insert query and parameters
-      console.log(`Executing insert query: ${insertSql} with parameters:`, JSON.stringify(items), title);
-  
-      db.query(insertSql, [JSON.stringify(items), title], (insertErr: mysql.QueryError | null, insertResult: OkPacket) => {
-        if (insertErr) {
-          console.error('Error saving template:', insertErr);
-          res.status(500).json({ error: insertErr.message });
-          return;
-        }
-  
-        console.log('Template saved successfully:', insertResult);
-        res.status(200).json({ message: 'Template saved successfully', templateId: insertResult.insertId });
-      });
-    });
-  });
-  
-  
-  
-  app.get('/api/templates/:title', (req, res) => {
+    const [checkResult] = await conn.query(checkSql, [title]);
+    
+    if (Array.isArray(checkResult) && checkResult.length > 0) {
+      console.log('Template with this title already exists:', title);
+      conn.release();
+      res.status(409).json({ message: 'A template with this title already exists.' });
+      return;
+    }
+
+    const insertSql = `INSERT INTO templates (template_json, title) VALUES (?, ?)`;
+    await conn.query(insertSql, [JSON.stringify(items), title]);
+    conn.release();
+
+    res.status(200).json({ message: 'Template saved successfully' });
+  } catch (error) {
+    const errorMessage = (error instanceof Error) ? error.message : 'An unknown error occurred';
+    console.error('Database error:', errorMessage);
+    res.status(500).json({ error: errorMessage });
+  }
+});
+
+app.get('/api/templates/:title', async (req, res) => {
+  try {
     const { title } = req.params;
     const sql = 'SELECT * FROM templates WHERE title = ?';
+    const conn = await getConnection();
+    
+    const [result] = await conn.query(sql, [title]);
+    conn.release();
 
-    db.query(sql, [title], (err: { message: any; }, result: string | any[]) => {
-      if (err) {
-        console.error('Error fetching template:', err);
-        res.status(500).json({ error: err.message });
-        return;
-      }
-  
-      // Use type guard to check if result is an array of RowDataPacket
-      if (Array.isArray(result) && result.length > 0) {
-        res.json(result[0]);
-      } else {
-        res.status(404).json({ message: 'Template not found' });
-      }
-    });
-  });
+    if (Array.isArray(result) && result.length > 0) {
+      res.json(result[0]);
+    } else {
+      res.status(404).json({ message: 'Template not found' });
+    }
+  } catch (error) {
+    const errorMessage = (error instanceof Error) ? error.message : 'An unknown error occurred';
+    console.error('Database error:', errorMessage);
+    res.status(500).json({ error: errorMessage });
+  }
+});
 
-app.get('/api', (_req, res) => {
-    db.query('SELECT * FROM templates', (err: { message: any; }, results: string | any[]) => {
-      if (err) {
-        res.status(500).json({ error: err.message });
-        return;
-      }
-  
-      // Type guard to check if results is an array
-      if (Array.isArray(results)) {
-        if (results.length === 0) {
-          res.json({ message: 'No templates found' });
-        } else {
-          res.json(results);
-        }
-      } else {
-        res.status(500).json({ error: 'Unexpected result type' });
-      }
-    });
-  });
-  
+
+
+app.get('/api', async (_req, res) => {
+  try {
+    const conn = await getConnection();
+    const [results] = await conn.query('SELECT * FROM templates');
+    conn.release();
+
+    if (Array.isArray(results)) {
+      res.json(results.length === 0 ? { message: 'No templates found' } : results);
+    } else {
+      res.status(500).json({ error: 'Unexpected result type' });
+    }
+  } catch (error) {
+    const errorMessage = (error instanceof Error) ? error.message : 'An unknown error occurred';
+    console.error('Database error:', errorMessage);
+    res.status(500).json({ error: errorMessage });
+  }
+});
 
 app.listen(port, () => {
   console.log(`Server listening on http://localhost:${port}`);
