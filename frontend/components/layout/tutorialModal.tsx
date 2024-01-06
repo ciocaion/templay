@@ -19,6 +19,7 @@ import {
   StepTitle,
   StepSeparator,
   VStack,
+  Image,
   Text
 } from '@chakra-ui/react';
 
@@ -29,7 +30,6 @@ interface TutorialModalProps {
 
 function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
   const steps = [
-    { title: '' },
     { title: '' },
     { title: '' },
     { title: '' },
@@ -68,10 +68,39 @@ function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
         </Text>
       </>
     ),
-    "App Structure",
-    "Create template",
-    "Template page information",
-    "Share the template"
+    (
+      <>
+        <Text fontSize="24px" textAlign="center" fontWeight="bold">
+          Dashboard Structure
+        </Text>
+        <Text fontSize="18px" textAlign="center" marginBottom='32px'>
+        Check our quick guide on Dashboard information
+        </Text>
+        <Image src="/assets/dashboard-tutorial.gif" alt="Tutorial GIF" mt={4} />
+      </>
+    ),
+    (
+      <>
+        <Text fontSize="24px" textAlign="center" fontWeight="bold">
+          Create Template
+        </Text>
+        <Text fontSize="18px" textAlign="center" marginBottom='32px'>
+        Check our quick guide on creating a Template layout
+        </Text>
+        <Image src="/assets/create-tutorial.gif" alt="Tutorial GIF" mt={4} />
+      </>
+    ),
+    (
+      <>
+        <Text fontSize="24px" textAlign="center" fontWeight="bold">
+          Share Template
+        </Text>
+        <Text fontSize="18px" textAlign="center" marginBottom='32px'>
+        Check our quick guide on sharing a Template
+        </Text>
+        <Image src="/assets/retreive-tutorial.gif" alt="Tutorial GIF" mt={4} />
+      </>
+    ),
   ];
 
   const { activeStep, setActiveStep } = useSteps({
