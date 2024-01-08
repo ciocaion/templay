@@ -24,8 +24,8 @@ function Builder() {
   const [droppedItems, setDroppedItems] = useState<DraggableItems>([]);
   const [title, setTitle] = useState('');
   const [isDuplicateTitle, setIsDuplicateTitle] = useState(false);
-  const [isSaveSuccess, setIsSaveSuccess] = useState(false); // State for save success alert
-  const [isRetrieveSuccess, setIsRetrieveSuccess] = useState(false); // State for retrieve success alert
+  const [isSaveSuccess, setIsSaveSuccess] = useState(false);
+  const [isRetrieveSuccess, setIsRetrieveSuccess] = useState(false);
   const { isOpen: isSaveModalOpen, onOpen: onSaveModalOpen, onClose: onSaveModalClose } = useDisclosure();
   const { isOpen: isRetrieveModalOpen, onOpen: onRetrieveModalOpen, onClose: onRetrieveModalClose } = useDisclosure();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -83,7 +83,7 @@ function Builder() {
       }
 
       // Proceed with saving the new template
-      const response = await fetch('http://localhost:4000/api/templates', {
+      const response = await fetch('https://api.templay.dev.gea.com/api/templates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items: droppedItems, title })
@@ -110,7 +110,7 @@ function Builder() {
 
   const handleRetrieveTemplate = async () => {
     try {
-      const response = await fetch(`https://localhost:4000/api/templates/${title}`);
+      const response = await fetch(`https://api.templay.dev.gea.com/api/templates/${title}`);
       if (!response.ok) {
         throw Error('Network response was not ok');
       }
@@ -134,6 +134,15 @@ function Builder() {
       setIsRetrieveSuccess(false); // Optionally, set to false if there's an error
     }
   };
+  const customOnSaveModalClose = () => {
+    setIsDuplicateTitle(false); // Reset the duplicate title flag
+    onSaveModalClose(); // Call the original onClose function from useDisclosure
+  };
+
+  const customOnRetrieveModalClose = () => {
+    setIsDuplicateTitle(false); // Reset the duplicate title flag
+    onRetrieveModalClose(); // Call the original onClose function from useDisclosure
+  };
 
   return (
     <Box w="100vw" h="100vh" bg="#EBEBEB">
@@ -152,7 +161,7 @@ function Builder() {
         />
       </VStack>
 
-      <Modal isOpen={isSaveModalOpen} onClose={onSaveModalClose}>
+      <Modal isOpen={isSaveModalOpen} onClose={customOnSaveModalClose}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Save Template</ModalHeader>
@@ -167,13 +176,20 @@ function Builder() {
         </ModalContent>
       </Modal>
 
-      <Modal isOpen={isRetrieveModalOpen} onClose={onRetrieveModalClose}>
+      <Modal isOpen={isRetrieveModalOpen} onClose={customOnRetrieveModalClose}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Retrieve Template</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Input placeholder="Template Title" value={title} onChange={(e) => setTitle(e.target.value)} />
+          <Input 
+  placeholder="Template Title" 
+  value={title} 
+  onChange={(e) => {
+    setTitle(e.target.value);
+    setIsDuplicateTitle(false); // Reset duplicate title flag
+  }} 
+/>
           </ModalBody>
           <ModalFooter>
             <Button colorScheme="blue" mr={3} onClick={handleRetrieveTemplate}>Retrieve</Button>
@@ -181,6 +197,15 @@ function Builder() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+
+      {/* Alert for Duplicate Title */}
+{isDuplicateTitle && (
+  <Alert status="error">
+    <AlertIcon />
+    A template with this title already exists. Please use a different title.
+  </Alert>
+)}
+
 
       {/* Success Alert for Save Template */}
       {isSaveSuccess && (
