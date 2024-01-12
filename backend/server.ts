@@ -38,7 +38,7 @@ app.post('/api/templates', async (req, res) => {
       return;
     }
 
-    const checkSql = 'SELECT * FROM templates WHERE JSON_UNQUOTE(JSON_EXTRACT(template_json, "$.title")) = ?';
+    const checkSql = 'SELECT * FROM templates WHERE title = ?';
     const conn = await getConnection();
     
     const [checkResult] = await conn.query(checkSql, [title]);
@@ -102,6 +102,24 @@ app.get('/api', async (_req, res) => {
     res.status(500).json({ error: errorMessage });
   }
 });
+
+app.delete('/api/templates/:title', async (req, res) => {
+  try {
+    const { title } = req.params;
+    const sql = 'DELETE FROM templates WHERE title = ?';
+    const conn = await getConnection();
+    
+    await conn.query(sql, [title]);
+    conn.release();
+
+    res.status(200).json({ message: 'Template deleted successfully' });
+  } catch (error) {
+    const errorMessage = (error instanceof Error) ? error.message : 'An unknown error occurred';
+    console.error('Database error:', errorMessage);
+    res.status(500).json({ error: errorMessage });
+  }
+});
+
 
 app.listen(port, () => {
   console.log(`Server listening on http://localhost:${port}`);

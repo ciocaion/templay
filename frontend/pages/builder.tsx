@@ -29,6 +29,8 @@ function Builder() {
   const { isOpen: isSaveModalOpen, onOpen: onSaveModalOpen, onClose: onSaveModalClose } = useDisclosure();
   const { isOpen: isRetrieveModalOpen, onOpen: onRetrieveModalOpen, onClose: onRetrieveModalClose } = useDisclosure();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteSuccess, setIsDeleteSuccess] = useState(false);
+
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -38,6 +40,38 @@ function Builder() {
     console.log('main dropped items', droppedItems)
     console.log('RERENDER');
   }, [droppedItems]);
+
+  useEffect(() => {
+    let timer: string | number | NodeJS.Timeout | undefined;
+    if (isDuplicateTitle) {
+      timer = setTimeout(() => {
+        setIsDuplicateTitle(false);
+      }, 5000);
+    }
+    return () => clearTimeout(timer); // Clear the timer when the component unmounts or the state changes
+  }, [isDuplicateTitle]);
+
+  useEffect(() => {
+    let timer: string | number | NodeJS.Timeout | undefined;
+    if (isRetrieveSuccess) {
+      timer = setTimeout(() => {
+        setIsRetrieveSuccess(false);
+      }, 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [isRetrieveSuccess]);
+
+  useEffect(() => {
+    let timer: string | number | NodeJS.Timeout | undefined;
+    if (isDeleteSuccess) {
+      timer = setTimeout(() => {
+        setIsDeleteSuccess(false);
+      }, 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [isDeleteSuccess]);
+  
+  
 
   const appendChildren = (id: string, newItems: DraggableItems, columnId?: string) => {
     setDroppedItems(droppedItems.map(item => {
@@ -74,43 +108,36 @@ function Builder() {
 
   const handleSaveTemplate = async () => {
     try {
-      // Check if the title already exists in localStorage
-      const existingTitles = JSON.parse(localStorage.getItem('templateTitles') || '[]');
-      if (existingTitles.includes(title)) {
-        // Set isDuplicateTitle to true if a duplicate title is found
-        setIsDuplicateTitle(true);
-        return; // Don't proceed further
-      }
-
-      // Proceed with saving the new template
-      const response = await fetch('https://api.templay.dev.gea.com/api/templates', {
+      const response = await fetch('http://localhost:4000/api/templates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items: droppedItems, title })
       });
-
+  
+      if (response.status === 409) {
+        // If status is 409, it means a duplicate title exists
+        setIsDuplicateTitle(true);
+        return;
+      }
+  
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-
-      // Save the new title to localStorage
-      existingTitles.push(title);
-      localStorage.setItem('templateTitles', JSON.stringify(existingTitles));
-
+  
       const responseData = await response.json();
       console.log('Save successful:', responseData);
-      console.log('Save successful:', responseData);
-      setIsSaveSuccess(true); // Set success state to true
+      setIsSaveSuccess(true);
       onSaveModalClose();
     } catch (error) {
       console.error('Error saving template:', error);
-      setIsSaveSuccess(false); // Optionally, set to false if there's an error
-    }};
+      setIsSaveSuccess(false);
+    }
+  };
   
 
   const handleRetrieveTemplate = async () => {
     try {
-      const response = await fetch(`https://api.templay.dev.gea.com/api/templates/${title}`);
+      const response = await fetch(`http://localhost:4000/api/templates/${title}`);
       if (!response.ok) {
         throw Error('Network response was not ok');
       }
@@ -143,6 +170,26 @@ function Builder() {
     setIsDuplicateTitle(false); // Reset the duplicate title flag
     onRetrieveModalClose(); // Call the original onClose function from useDisclosure
   };
+
+  const handleDeleteTemplate = async () => {
+    try {
+      const response = await fetch(`http://localhost:4000/api/templates/${title}`, {
+        method: 'DELETE',
+      });
+  
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+  
+      console.log('Delete successful');
+      setIsDeleteSuccess(true); // Set success state to true
+      // Reset the title or any other state if necessary
+    } catch (error) {
+      console.error('Error deleting template:', error);
+      // Handle error state here
+    }
+  };
+  
 
   return (
     <Box w="100vw" h="100vh" bg="#EBEBEB">
@@ -223,9 +270,19 @@ function Builder() {
         </Alert>
       )}
 
+{isDeleteSuccess && (
+  <Alert status="success">
+    <AlertIcon />
+    Template deleted successfully!
+  </Alert>
+)}
+
+
       <HStack spacing={4} justify="center" align="center" marginTop="16px">
         <MainButton text="Save Template" onClick={onSaveModalOpen} />
         <SecondaryButton text="Retrieve Template" onClick={onRetrieveModalOpen} />
+        <SecondaryButton text="Delete Template" onClick={handleDeleteTemplate} style={{ borderColor: "#ff0000" }} textColor="#ff0000" 
+ />
       </HStack>
     </Box>
   );

@@ -5,9 +5,11 @@ interface SecondButtonProps {
   text: string;
   onClick?: () => void;  // Optional onClick handler
   icon?: React.ReactNode; // Optional icon
+  style?: React.CSSProperties;
+  textColor?: string;
 }
 
-function SecondaryButton({ text, onClick, icon }: SecondButtonProps) {
+function SecondaryButton({ text, onClick, icon, style, textColor  }: SecondButtonProps) {
   return (
     <Box
       onClick={onClick} // Attach the onClick event
@@ -24,9 +26,10 @@ function SecondaryButton({ text, onClick, icon }: SecondButtonProps) {
       padding="0 1rem"
       _hover={{ backgroundColor: "#E6E6F8" }} 
       cursor="pointer"
+      style={{ ...style }}
     >
       <Text
-        color="#020281"
+       color={textColor || "#020281"}
         textAlign="center"
         fontSize="1rem" 
         fontWeight="semibold"

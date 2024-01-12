@@ -43,7 +43,7 @@ app.post('/api/templates', (req, res) => __awaiter(void 0, void 0, void 0, funct
             res.status(400).json({ message: 'Invalid title format.' });
             return;
         }
-        const checkSql = 'SELECT * FROM templates WHERE JSON_UNQUOTE(JSON_EXTRACT(template_json, "$.title")) = ?';
+        const checkSql = 'SELECT * FROM templates WHERE title = ?';
         const conn = yield (0, db_1.getConnection)();
         const [checkResult] = yield conn.query(checkSql, [title]);
         if (Array.isArray(checkResult) && checkResult.length > 0) {
@@ -94,6 +94,21 @@ app.get('/api', (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
         else {
             res.status(500).json({ error: 'Unexpected result type' });
         }
+    }
+    catch (error) {
+        const errorMessage = (error instanceof Error) ? error.message : 'An unknown error occurred';
+        console.error('Database error:', errorMessage);
+        res.status(500).json({ error: errorMessage });
+    }
+}));
+app.delete('/api/templates/:title', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { title } = req.params;
+        const sql = 'DELETE FROM templates WHERE title = ?';
+        const conn = yield (0, db_1.getConnection)();
+        yield conn.query(sql, [title]);
+        conn.release();
+        res.status(200).json({ message: 'Template deleted successfully' });
     }
     catch (error) {
         const errorMessage = (error instanceof Error) ? error.message : 'An unknown error occurred';
