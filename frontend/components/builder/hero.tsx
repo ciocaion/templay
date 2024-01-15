@@ -1,7 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Editable, EditablePreview, EditableInput, Flex } from '@chakra-ui/react';
 
-function Hero() {
+interface HeroProps {
+  onTextChange: (text: { header: string; subHeader: string; bodyText: string }) => void;
+  initialText?: { header: string; subHeader: string; bodyText: string };
+}
+
+function Hero({ onTextChange, initialText }: HeroProps) {
+  const [header, setHeader] = useState(initialText?.header || "Header");
+  const [subHeader, setSubHeader] = useState(initialText?.subHeader || "Subheader");
+  const [bodyText, setBodyText] = useState(initialText?.bodyText || "Here is some body text...");
+
+  const handleHeaderChange = (value: string) => {
+    setHeader(value);
+    onTextChange({ header: value, subHeader, bodyText });
+  };
+  
+  const handleSubHeaderChange = (value: string) => {
+    setSubHeader(value);
+    onTextChange({ header, subHeader: value, bodyText });
+  };
+  
+  const handleBodyTextChange = (value: string) => {
+    setBodyText(value);
+    onTextChange({ header, subHeader, bodyText: value });
+  };
+  
   return (
     <Box
       w="100%"
@@ -11,15 +35,15 @@ function Hero() {
     >
       <Flex w="100%" h="100%">
         <Box w="50%" p="32px" color="white">
-          <Editable defaultValue="Header" fontSize="2xl">
+          <Editable value={header} fontSize="2xl" onChange={handleHeaderChange}>
             <EditablePreview />
             <EditableInput />
           </Editable>
-          <Editable defaultValue="Subheader" fontSize="xl" mt="2">
+          <Editable value={subHeader} fontSize="xl" mt="2" onChange={handleSubHeaderChange}>
             <EditablePreview />
             <EditableInput />
           </Editable>
-          <Editable defaultValue="Here is some body text. This section can contain additional information, descriptions, or other content." mt="2">
+          <Editable value={bodyText} mt="2" onChange={handleBodyTextChange}>
             <EditablePreview />
             <EditableInput />
           </Editable>

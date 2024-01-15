@@ -16,6 +16,8 @@ export interface DraggableItem {
   type: string;
   layoutType?: GridLayoutType;
   children: DraggableItems;
+  heroText?: { header: string; subHeader: string; bodyText: string }; // Add heroText property
+  bannerText?: { header: string; subHeader: string; bodyText: string };
 }
 
 export interface DraggableItems extends Array<DraggableItem> { };
@@ -30,7 +32,26 @@ function Builder() {
   const { isOpen: isRetrieveModalOpen, onOpen: onRetrieveModalOpen, onClose: onRetrieveModalClose } = useDisclosure();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteSuccess, setIsDeleteSuccess] = useState(false);
+  
+  const handleHeroTextChange = (heroText: any, itemId: string) => {
+    // Update the state of a specific Hero component in droppedItems
+    setDroppedItems(droppedItems.map(item => {
+      if (item.id === itemId) {
+        return { ...item, heroText };
+      }
+      return item;
+    }));
+  };
 
+  const handleBannerTextChange = (bannerText: any, itemId: string) => {
+    // Update the state of a specific Hero component in droppedItems
+    setDroppedItems(droppedItems.map(item => {
+      if (item.id === itemId) {
+        return { ...item, bannerText };
+      }
+      return item;
+    }));
+  };
 
   const openModal = () => {
     setIsModalOpen(true);
@@ -95,7 +116,14 @@ function Builder() {
 
   const handleComponentSelection = (componentType: string, layoutType?: GridLayoutType) => {
     const newComponentId = `component-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const newComponent = { id: newComponentId, type: componentType, layoutType: layoutType, children: [] };
+    const newComponent: DraggableItem = { 
+      id: newComponentId, 
+      type: componentType, 
+      layoutType: layoutType, 
+      children: [],
+      heroText: { header: '', subHeader: '', bodyText: '' },
+      bannerText: { header: '', subHeader: '', bodyText: '' } 
+    };
     setDroppedItems(prevItems => [...prevItems, newComponent]);
     setIsModalOpen(false);
   };
@@ -194,13 +222,15 @@ function Builder() {
   return (
     <Box w="100vw" h="100vh" bg="#EBEBEB">
       <VStack spacing={0} h="100%" position="relative">
-        <TemplateArea
-          items={droppedItems}
-          openModal={openModal}
-          appendChildren={appendChildren}
-          onDelete={handleDelete}
-          onComponentAdd={(type, layoutType, gridId) => {}}
-        />
+      <TemplateArea
+        items={droppedItems}
+        openModal={openModal}
+        appendChildren={appendChildren}
+        onDelete={handleDelete}
+        onHeroTextChange={handleHeroTextChange} // Ensure this is passed to TemplateArea
+        onBannerTextChange={handleBannerTextChange} 
+        onComponentAdd={(type, layoutType, gridId) => {}}
+      />
         <Sidebar
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
@@ -215,6 +245,20 @@ function Builder() {
           <ModalCloseButton />
           <ModalBody>
             <Input placeholder="Template Title" value={title} onChange={(e) => setTitle(e.target.value)} />
+            <ol style={{ paddingLeft: '20px', marginTop: '16px' }}>
+              <li style={{ marginBottom: '16px' }}>
+                We recommend having the next title style: 
+               <p><b>"your-page-name.gea.com-"</b></p>
+              </li>
+              <li style={{ marginBottom: '16px' }}>
+                After hyphen we should put the number of draft iteration, example: 
+               <p><b>"-1" or "-2"</b></p>
+              </li>
+              <li style={{ marginBottom: '16px' }}>
+                Final title should be: 
+               <p><b>"your-page-name.gea.com-1"</b></p>
+              </li>
+            </ol>
           </ModalBody>
           <ModalFooter>
             <Button colorScheme="blue" mr={3} onClick={handleSaveTemplate}>Save</Button>

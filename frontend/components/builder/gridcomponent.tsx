@@ -15,9 +15,11 @@ interface GridComponentProps {
   items: DraggableItems;
   appendChildren: (id: string, newItems: DraggableItems, columnId?: string) => void;
   onComponentAdd: (type: string, layoutType: GridLayoutType, gridId: string) => void;
+  onHeroTextChange: (heroText: { header: string; subHeader: string; bodyText: string }, itemId: string) => void; 
+  onBannerTextChange: (bannerText: { header: string; subHeader: string; bodyText: string }, itemId: string) => void; 
 }
 
-const GridComponent: React.FC<GridComponentProps> = ({ id: gridId, layout, items = [], appendChildren }) => {
+const GridComponent: React.FC<GridComponentProps> = ({ id: gridId, layout, items = [], appendChildren, onBannerTextChange, onHeroTextChange}) => {
   // Existing state and hooks
   const [isModalOpen, setIsModalOpen] = useState(false);  
   const [currentColumn, setCurrentColumn] = useState('');
@@ -55,11 +57,11 @@ const GridComponent: React.FC<GridComponentProps> = ({ id: gridId, layout, items
     return (
       <GridItem key={id} border="2px dashed #020281" p={0} bg="white">
         {children.map((item) => {
-          switch (item.type) {
-            case 'BANNER':
-              return <Banner key={item.id} />;
-            case 'HERO':
-              return <Hero key={item.id} />;
+    switch (item.type) {
+      case 'BANNER':
+          return <Banner key={item.id} onTextChange={(text) => onBannerTextChange(text, item.id)} initialText={item.bannerText} />;
+      case 'HERO':
+          return <Hero key={item.id} onTextChange={(text) => onHeroTextChange(text, item.id)} initialText={item.heroText} />;
               case 'PAGE':
                 return <PageContent key={item.id} />;
             default:

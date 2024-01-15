@@ -17,9 +17,11 @@ interface TemplateAreaProps {
   onComponentAdd: (type: string, layoutType: GridLayoutType, gridId: string) => void;
   appendChildren: (id: string, items: DraggableItems, columnId?: string) => void;
   onDelete: (itemId: string) => void;
+  onHeroTextChange: (heroText: { header: string; subHeader: string; bodyText: string }, itemId: string) => void; 
+  onBannerTextChange: (bannerText: { header: string; subHeader: string; bodyText: string }, itemId: string) => void; 
 }
 
-const TemplateArea: React.FC<TemplateAreaProps> = ({ items, openModal, onComponentAdd, appendChildren, onDelete }) => {
+const TemplateArea: React.FC<TemplateAreaProps> = ({ items, openModal, onComponentAdd, appendChildren, onDelete, onHeroTextChange, onBannerTextChange }) => {
 
   const renderItem = (item: DraggableItem, index: number) => {
     const key = item.type === 'GRID' ? `GRID-${index}` : item.id;
@@ -36,11 +38,23 @@ const TemplateArea: React.FC<TemplateAreaProps> = ({ items, openModal, onCompone
     let component;
     switch (item.type) {
       case 'BANNER':
-        component = <Banner key={key} />;
+        component = (
+          <Banner 
+          key={key}
+          onTextChange={(text) => onBannerTextChange(text, item.id)}
+          initialText={item.bannerText} // Pass initial text if available
+          />
+        );
         break;
-      case 'HERO':
-        component = <Hero key={key} />;
-        break;
+  case 'HERO':
+    component = (
+      <Hero 
+        key={key}
+        onTextChange={(text) => onHeroTextChange(text, item.id)}
+        initialText={item.heroText} // Pass initial text if available
+      />
+    );
+    break;
       case 'GRID':
         component = (
           <GridComponent 
@@ -50,6 +64,8 @@ const TemplateArea: React.FC<TemplateAreaProps> = ({ items, openModal, onCompone
             items={item.children}
             appendChildren={appendChildren}
             onComponentAdd={onComponentAdd}
+            onHeroTextChange={(text: { header: string; subHeader: string; bodyText: string; }) => onHeroTextChange(text, item.id)}
+            onBannerTextChange={(text: { header: string; subHeader: string; bodyText: string; }) => onBannerTextChange(text, item.id)}
           />
         );
         break;
