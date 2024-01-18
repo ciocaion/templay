@@ -5,13 +5,6 @@ import { ChakraProvider, VStack } from '@chakra-ui/react';
 import Header from '../components/layout/header'; // Ensure correct path
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
-
-  // Function to toggle the sidebar's collapsed state
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!isSidebarCollapsed);
-  };
-
   useEffect(() => {
     // Fetch data or perform other global side effects here
   }, []);
@@ -19,8 +12,8 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ChakraProvider>
       <VStack spacing={0} align="stretch" minH="100vh">
-        <Header onToggleSidebar={toggleSidebar} />
-        <Component {...pageProps} isSidebarCollapsed={isSidebarCollapsed} />
+        <Header />
+        <Component {...pageProps} />
       </VStack>
     </ChakraProvider>
   );

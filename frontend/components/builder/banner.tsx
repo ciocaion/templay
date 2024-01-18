@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Editable, EditablePreview, EditableInput, Flex } from '@chakra-ui/react';
 
 interface BannerProps {
@@ -11,6 +11,7 @@ function Banner({ onTextChange, initialText, width = '90%' }: BannerProps) {
   const [header, setHeader] = useState(initialText?.header || "Header");
   const [subHeader, setSubHeader] = useState(initialText?.subHeader || "Subheader");
   const [bodyText, setBodyText] = useState(initialText?.bodyText || "Here is some body text...");
+  
 
   const handleBannerHeaderChange = (value: string) => {
     setHeader(value);

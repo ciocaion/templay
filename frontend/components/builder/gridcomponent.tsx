@@ -34,6 +34,7 @@ const GridComponent: React.FC<GridComponentProps> = ({ id: gridId, layout, items
     }
   }, [items]);
 
+  
   const handleComponentSelection = (componentType: string, layoutType?: GridLayoutType) => {
 
     console.log(componentType, layoutType);
@@ -48,6 +49,7 @@ const GridComponent: React.FC<GridComponentProps> = ({ id: gridId, layout, items
     setIsNewModalOpen(false);
     setCurrentColumn('');
   };
+  
 
 
   const renderGridItem = (item: DraggableItem) => {
@@ -63,8 +65,8 @@ const GridComponent: React.FC<GridComponentProps> = ({ id: gridId, layout, items
       case 'HERO':
           return <Hero key={item.id} onTextChange={(text) => onHeroTextChange(text, item.id)} initialText={item.heroText} />;
               case 'PAGE':
-                return <PageContent key={item.id} />;
-            default:
+                return <PageContent key={item.id} onTextChange={(text) => onHeroTextChange(text, item.id)} initialText={item.heroText} />;
+                default:
               return <div key={item.id}>{item.type}</div>;
           }
         })}

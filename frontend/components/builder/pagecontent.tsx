@@ -1,7 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Editable, EditablePreview, EditableInput, Flex } from '@chakra-ui/react';
 
-function PageContent({ width = '90%' }) {
+interface CardProps {
+  onTextChange: (text: { header: string; subHeader: string; bodyText: string }) => void;
+  initialText?: { header: string; subHeader: string; bodyText: string };
+  width?: string
+}
+
+function PageContent({ onTextChange, initialText, width = '90%' }: CardProps) {
+  const [header, setHeader] = useState(initialText?.header || "Header");
+  const [subHeader, setSubHeader] = useState(initialText?.subHeader || "Subheader");
+  const [bodyText, setBodyText] = useState(initialText?.bodyText || "Here is some body text...");
+
+  const handleCardHeaderChange = (value: string) => {
+    setHeader(value);
+    onTextChange({ header: value, subHeader, bodyText });
+  };
+  
+  const handleCardSubHeaderChange = (value: string) => {
+    setSubHeader(value);
+    onTextChange({ header, subHeader: value, bodyText });
+  };
+  
+  const handleCardBodyTextChange = (value: string) => {
+    setBodyText(value);
+    onTextChange({ header, subHeader, bodyText: value });
+  };
 
   return (
     <Flex justifyContent="center">
@@ -19,15 +43,15 @@ function PageContent({ width = '90%' }) {
         <Box w="100%" h="100%" bgImage="url(./assets/gea-dummy.png)" bgSize="cover" bgPos="center">
         </Box>
         <Box w="100%" p="32px" color="white">
-          <Editable defaultValue="Header" fontSize="2xl">
+        <Editable value={header} fontSize="2xl" onChange={handleCardHeaderChange}>
             <EditablePreview />
             <EditableInput />
           </Editable>
-          <Editable defaultValue="Subheader" fontSize="xl" mt="2">
+          <Editable value={subHeader} fontSize="xl" mt="2" onChange={handleCardSubHeaderChange}>
             <EditablePreview />
             <EditableInput />
           </Editable>
-          <Editable defaultValue="Here is some body text. This section can contain additional information, descriptions, or other content." mt="2">
+          <Editable value={bodyText} mt="2" onChange={handleCardBodyTextChange}>
             <EditablePreview />
             <EditableInput />
           </Editable>

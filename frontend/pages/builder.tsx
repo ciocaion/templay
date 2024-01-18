@@ -10,6 +10,8 @@ import TemplateArea from '../components/builder/templatearea';
 import { GridLayoutType } from '../components/builder/gridcomponent';
 import MainButton from '@/components/ui/mainbutton';
 import SecondaryButton from '@/components/ui/secondarybutton';
+import { useRouter } from 'next/router';
+
 
 export interface DraggableItem {
   id: string;
@@ -18,8 +20,9 @@ export interface DraggableItem {
   children: DraggableItems;
   heroText?: { header: string; subHeader: string; bodyText: string }; // Add heroText property
   bannerText?: { header: string; subHeader: string; bodyText: string };
+  cardText?: { header: string; subHeader: string; bodyText: string };
+  richText?:{ header: string; bodyText: string };
 }
-
 export interface DraggableItems extends Array<DraggableItem> { };
 
 function Builder() {
@@ -32,7 +35,9 @@ function Builder() {
   const { isOpen: isRetrieveModalOpen, onOpen: onRetrieveModalOpen, onClose: onRetrieveModalClose } = useDisclosure();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteSuccess, setIsDeleteSuccess] = useState(false);
-  
+  const [isTemplateNotFound, setIsTemplateNotFound] = useState(false);
+  const router = useRouter();
+
   const handleHeroTextChange = (heroText: any, itemId: string) => {
     // Update the state of a specific Hero component in droppedItems
     setDroppedItems(droppedItems.map(item => {
@@ -43,11 +48,39 @@ function Builder() {
     }));
   };
 
-  const handleBannerTextChange = (bannerText: any, itemId: string) => {
+const handleBannerTextChange = (bannerText: any, itemId: string) => {
+  setDroppedItems(droppedItems.map(item => {
+    if (item.id === itemId) {
+      return { ...item, bannerText: { ...bannerText } };
+    }
+    return item;
+  }));
+};
+
+  const handleCardTextChange = (cardText: any, itemId: string) => {
     // Update the state of a specific Hero component in droppedItems
     setDroppedItems(droppedItems.map(item => {
       if (item.id === itemId) {
-        return { ...item, bannerText };
+        return { ...item, cardText };
+      }
+      return item;
+    }));
+  };
+
+  const handleRichTextChange = (richText: any, itemId: string) => {
+    // Update the state of a specific Hero component in droppedItems
+    setDroppedItems(droppedItems.map(item => {
+      if (item.id === itemId) {
+        return { ...item, richText };
+      }
+      return item;
+    }));
+  };
+
+  const handleGridTextChange = (updatedGrid: any) => {
+    setDroppedItems(droppedItems.map(item => {
+      if (item.id === updatedGrid.id) {
+        return updatedGrid;
       }
       return item;
     }));
@@ -81,6 +114,16 @@ function Builder() {
     }
     return () => clearTimeout(timer);
   }, [isRetrieveSuccess]);
+  
+  useEffect(() => {
+    let timer: string | number | NodeJS.Timeout | undefined;
+    if (isTemplateNotFound) {
+      timer = setTimeout(() => {
+        setIsTemplateNotFound(false);
+      }, 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [isTemplateNotFound]);
 
   useEffect(() => {
     let timer: string | number | NodeJS.Timeout | undefined;
@@ -91,28 +134,34 @@ function Builder() {
     }
     return () => clearTimeout(timer);
   }, [isDeleteSuccess]);
-  
-  
 
   const appendChildren = (id: string, newItems: DraggableItems, columnId?: string) => {
     setDroppedItems(droppedItems.map(item => {
       if (item.id === id) {
         if (columnId) {
-          item.children = item.children.map(columnItem => {
-            if (columnItem.id === columnId) {
-              columnItem.children = columnItem.children.concat(newItems);
-            }
-            return columnItem;
-          });
-        }
-        else {
-          item.children = item.children.concat(newItems);
+          return {
+            ...item,
+            children: item.children.map(columnItem => {
+              if (columnItem.id === columnId) {
+                return {
+                  ...columnItem,
+                  children: [...columnItem.children, ...newItems]
+                };
+              }
+              return columnItem;
+            })
+          };
+        } else {
+          return {
+            ...item,
+            children: [...item.children, ...newItems]
+          };
         }
       }
       return item;
     }));
-    console.log(droppedItems);
-  }
+  };
+  
 
   const handleComponentSelection = (componentType: string, layoutType?: GridLayoutType) => {
     const newComponentId = `component-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -132,7 +181,6 @@ function Builder() {
     const updatedItems = droppedItems.filter(item => item.id !== itemId);
     setDroppedItems(updatedItems);
   };
-
 
   const handleSaveTemplate = async () => {
     try {
@@ -161,7 +209,6 @@ function Builder() {
       setIsSaveSuccess(false);
     }
   };
-  
 
   const handleRetrieveTemplate = async () => {
     try {
@@ -179,13 +226,16 @@ function Builder() {
         // Assuming parsedTemplateJson is an array of items
         setDroppedItems(parsedTemplateJson);
         setIsRetrieveSuccess(true); // Set success state to true
+        setIsTemplateNotFound(false);
       } else {
         console.log('Template not found or invalid format');
         setIsRetrieveSuccess(false); // Optionally, set to false if there's an error
+        setIsTemplateNotFound(true);
       }
       onRetrieveModalClose();
     } catch (error) {
       console.error('Error retrieving template:', error);
+      setIsTemplateNotFound(true);
       setIsRetrieveSuccess(false); // Optionally, set to false if there's an error
     }
   };
@@ -193,7 +243,6 @@ function Builder() {
     setIsDuplicateTitle(false); // Reset the duplicate title flag
     onSaveModalClose(); // Call the original onClose function from useDisclosure
   };
-
   const customOnRetrieveModalClose = () => {
     setIsDuplicateTitle(false); // Reset the duplicate title flag
     onRetrieveModalClose(); // Call the original onClose function from useDisclosure
@@ -218,6 +267,11 @@ function Builder() {
     }
   };
   
+  const handlePreview = () => {
+    // Serialize the items array to a JSON string
+    const itemsJson = JSON.stringify(droppedItems);
+    router.push(`/preview?items=${encodeURIComponent(itemsJson)}`);
+  };
 
   return (
     <Box w="100vw" h="100vh" bg="#EBEBEB">
@@ -229,6 +283,9 @@ function Builder() {
         onDelete={handleDelete}
         onHeroTextChange={handleHeroTextChange} // Ensure this is passed to TemplateArea
         onBannerTextChange={handleBannerTextChange} 
+        onCardTextChange={handleCardTextChange}
+        onRichTextChange={handleRichTextChange}
+        onGridTextChange={handleGridTextChange}
         onComponentAdd={(type, layoutType, gridId) => {}}
       />
         <Sidebar
@@ -290,12 +347,12 @@ function Builder() {
       </Modal>
 
       {/* Alert for Duplicate Title */}
-{isDuplicateTitle && (
+      {isDuplicateTitle && (
   <Alert status="error">
     <AlertIcon />
     A template with this title already exists. Please use a different title.
   </Alert>
-)}
+       )}
 
 
       {/* Success Alert for Save Template */}
@@ -314,6 +371,14 @@ function Builder() {
         </Alert>
       )}
 
+{isTemplateNotFound && (
+  <Alert status="error">
+    <AlertIcon />
+    Template with this title does not exist!
+  </Alert>
+)}
+
+
 {isDeleteSuccess && (
   <Alert status="success">
     <AlertIcon />
@@ -325,8 +390,10 @@ function Builder() {
       <HStack spacing={4} justify="center" align="center" marginTop="16px">
         <MainButton text="Save Template" onClick={onSaveModalOpen} />
         <SecondaryButton text="Retrieve Template" onClick={onRetrieveModalOpen} />
-        <SecondaryButton text="Delete Template" onClick={handleDeleteTemplate} style={{ borderColor: "#ff0000" }} textColor="#ff0000" 
+        <SecondaryButton text="Delete Template" onClick={handleDeleteTemplate} style={{ borderColor: "#ff0000" }} textColor="#020281" 
  />
+ <SecondaryButton text="Preview Template" onClick={handlePreview} style={{ borderColor: "#FF80FF" }} textColor="#020281"  />
+
       </HStack>
     </Box>
   );

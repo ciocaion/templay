@@ -19,9 +19,12 @@ interface TemplateAreaProps {
   onDelete: (itemId: string) => void;
   onHeroTextChange: (heroText: { header: string; subHeader: string; bodyText: string }, itemId: string) => void; 
   onBannerTextChange: (bannerText: { header: string; subHeader: string; bodyText: string }, itemId: string) => void; 
+  onCardTextChange: (cardText: { header: string; subHeader: string; bodyText: string }, itemId: string) => void; 
+  onRichTextChange: (richText: { header: string; bodyText: string }, itemId: string) => void; 
+  onGridTextChange: (updatedGrid: DraggableItem) => void; 
 }
 
-const TemplateArea: React.FC<TemplateAreaProps> = ({ items, openModal, onComponentAdd, appendChildren, onDelete, onHeroTextChange, onBannerTextChange }) => {
+const TemplateArea: React.FC<TemplateAreaProps> = ({ items, openModal, onComponentAdd, appendChildren, onDelete, onHeroTextChange, onBannerTextChange, onCardTextChange, onRichTextChange, onGridTextChange}) => {
 
   const renderItem = (item: DraggableItem, index: number) => {
     const key = item.type === 'GRID' ? `GRID-${index}` : item.id;
@@ -66,14 +69,26 @@ const TemplateArea: React.FC<TemplateAreaProps> = ({ items, openModal, onCompone
             onComponentAdd={onComponentAdd}
             onHeroTextChange={(text: { header: string; subHeader: string; bodyText: string; }) => onHeroTextChange(text, item.id)}
             onBannerTextChange={(text: { header: string; subHeader: string; bodyText: string; }) => onBannerTextChange(text, item.id)}
-          />
+            />
         );
         break;
       case 'PAGE':
-        component = <PageContent key={key} />;
+        component = (
+          <PageContent 
+          key={key}
+          onTextChange={(text) => onCardTextChange(text, item.id)}
+          initialText={item.cardText} // Pass initial text if available
+          />
+        );
         break;
       case 'TEXT':
-        component = <RichText key={key} />;
+        component = (
+          <RichText 
+          key={key}
+          onTextChange={(text) => onRichTextChange(text, item.id)}
+          initialText={item.richText} // Pass initial text if available
+          />
+        );
         break;
       case 'IMAGE':
         return <ImageBlock key={key} />;
