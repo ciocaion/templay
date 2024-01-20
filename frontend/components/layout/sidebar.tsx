@@ -1,11 +1,15 @@
 import React, { useState } from "react";
-import { Box, VStack, Flex, Text, Tooltip } from "@chakra-ui/react";
+import { Box, VStack, Flex, Text, Tooltip, Button } from "@chakra-ui/react";
 import AddIcon from "@mui/icons-material/Add";
 import InfoIcon from "@mui/icons-material/Info";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import AppsIcon from "@mui/icons-material/Apps";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import SaveIcon from "@mui/icons-material/Save";           
+import RetrieveIcon from "@mui/icons-material/GetApp";   
+import DeleteIcon from "@mui/icons-material/Delete";     
+import PreviewIcon from "@mui/icons-material/Preview"; 
 
 interface SidebarProps {
   onOpenTutorial: () => void;
@@ -15,6 +19,7 @@ interface SidebarProps {
   onPreview: () => void;
   isCollapsed: boolean;
   isBuilderPage: boolean;
+  isPreviewPage:boolean;
   children?: React.ReactNode;
 }
 
@@ -25,6 +30,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onDelete,
   onPreview,
   isBuilderPage,
+  isPreviewPage
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -34,6 +40,12 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const iconStyle = { marginRight: isCollapsed ? "0" : "12px", color: "white" };
   const textStyle = { display: isCollapsed ? "none" : "block" };
+  const buttonStyle = {
+    width: '100%', 
+    justifyContent: 'center', 
+    display: 'flex', 
+    alignItems: 'center'
+  };
 
   const handleCreateTemplateClick = () => {
     window.location.href = "/dashboard";
@@ -49,11 +61,13 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <Box
-      w={isCollapsed ? "60px" : "250px"}
+      w={isCollapsed ? "72px" : "250px"}
       h="100vh"
       bg="#020281"
       p={4}
       paddingTop="56px"
+      display='flex'
+      flexDirection='column'
     >
       <VStack spacing={6} align="stretch" color="white">
         <Flex align="left" justify="left" mb={12}>
@@ -129,6 +143,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             About
           </Text>
         </Flex>
+        {!isPreviewPage && !isBuilderPage &&(
         <Flex align="center">
           {isCollapsed ? (
             // Add Tooltip to the icon when collapsed
@@ -146,47 +161,73 @@ const Sidebar: React.FC<SidebarProps> = ({
           >
             View Components
           </Text>
-        </Flex>
-        <Flex align="center">
-          {isCollapsed ? (
-            // Add Tooltip to the icon when collapsed
-            <Tooltip label="View Tutorial" placement="right">
+        </Flex>)}
+        {!isPreviewPage && !isBuilderPage &&(
+          <Flex align="center">
+            {isCollapsed ? (
+              <Tooltip label="View Tutorial" placement="right">
+                <VisibilityIcon style={iconStyle} onClick={onOpenTutorial} />
+              </Tooltip>
+            ) : (
               <VisibilityIcon style={iconStyle} onClick={onOpenTutorial} />
-            </Tooltip>
-          ) : (
-            <VisibilityIcon style={iconStyle} onClick={onOpenTutorial} />
-          )}
-          <Text
-            style={textStyle}
-            fontSize="md"
-            onClick={onOpenTutorial}
-            cursor="pointer"
-          >
-            View Tutorial
-          </Text>
-        </Flex>
+            )}
+            <Text
+              style={textStyle}
+              fontSize="md"
+              onClick={onOpenTutorial}
+              cursor="pointer"
+            >
+              View Tutorial
+            </Text>
+          </Flex>
+        )}
         {isBuilderPage && (
+          
           <>
-            <Flex align="center" onClick={onSave} cursor="pointer">
-              <Text style={textStyle} fontSize="md">
-                Save Template
-              </Text>
-            </Flex>
-            <Flex align="center" onClick={onRetrieve} cursor="pointer">
-              <Text style={textStyle} fontSize="md">
-                Retrieve Template
-              </Text>
-            </Flex>
-            <Flex align="center" onClick={onDelete} cursor="pointer">
-              <Text style={textStyle} fontSize="md">
-                Delete Template
-              </Text>
-            </Flex>
-            <Flex align="center" onClick={onPreview} cursor="pointer">
-              <Text style={textStyle} fontSize="md">
-                Preview Template
-              </Text>
-            </Flex>
+            <Tooltip label="Save Template" placement="right">
+              <Button onClick={onSave} colorScheme="green" style={buttonStyle}>
+                <SaveIcon style={iconStyle} />
+                <Text style={textStyle} fontSize="md">
+                  Save Template
+                </Text>
+              </Button>
+            </Tooltip>
+            <Tooltip label="Retrieve Template" placement="right">
+              <Button onClick={onRetrieve} colorScheme="pink" style={buttonStyle}>
+                <RetrieveIcon style={iconStyle} />
+                <Text style={textStyle} fontSize="md">
+                  Retrieve Template
+                </Text>
+              </Button>
+            </Tooltip>
+            <Tooltip label="Delete Template" placement="right">
+              <Button onClick={onDelete} colorScheme="red" style={buttonStyle}>
+                <DeleteIcon style={iconStyle} />
+                <Text style={textStyle} fontSize="md">
+                  Delete Template
+                </Text>
+              </Button>
+            </Tooltip>
+            <Tooltip label="Preview Template" placement="right">
+              <Button onClick={onPreview} colorScheme="blue" style={buttonStyle}>
+                <PreviewIcon style={iconStyle} />
+                <Text style={textStyle} fontSize="md">
+                  Preview Template
+                </Text>
+              </Button>
+            </Tooltip>
+          </>
+        )}
+                {isPreviewPage && (
+          <>
+            <Tooltip label="Retrieve Template" placement="right">
+              <Button onClick={onRetrieve} colorScheme="pink" style={buttonStyle}>
+                <RetrieveIcon style={iconStyle} />
+                <Text style={textStyle} fontSize="md">
+                  Retrieve Template
+                </Text>
+              </Button>
+            </Tooltip>
           </>
         )}
       </VStack>

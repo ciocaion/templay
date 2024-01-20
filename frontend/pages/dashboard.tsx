@@ -44,11 +44,19 @@ const Dashboard: React.FC<DashboardProps> = ({ isSidebarCollapsed }) => {
         onClose={() => setTutorialOpen(false)}
       />
       <HStack spacing={0}>
-        <Sidebar onOpenTutorial={openTutorial} isCollapsed={isSidebarCollapsed} />
+        <Sidebar onOpenTutorial={openTutorial} isCollapsed={isSidebarCollapsed} onSave={function (): void {
+          throw new Error('Function not implemented.');
+        } } onRetrieve={function (): void {
+          throw new Error('Function not implemented.');
+        } } onDelete={function (): void {
+          throw new Error('Function not implemented.');
+        } } onPreview={function (): void {
+          throw new Error('Function not implemented.');
+        } } isBuilderPage={false} isPreviewPage={false} />
         <Box flex="1" >
           {/* General Title */}
-          <VStack spacing={4} alignItems="center">
-            <Text fontSize="xl" fontWeight="bold" textAlign="center" marginBottom="48px" marginTop="-140px">
+          <VStack spacing={4} alignItems="left">
+            <Text fontSize="38px" fontWeight="bold" textAlign="left" marginBottom="48px" marginTop="-140px" marginLeft="24px">
               Create your desired page layout
             </Text>
           </VStack>

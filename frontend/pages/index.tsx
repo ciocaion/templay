@@ -5,6 +5,7 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
 import styles from '../styles/home.module.css';
 import Link from 'next/link';
+import { Input } from '@chakra-ui/react';
 
 
 export default function Home() {
@@ -19,12 +20,18 @@ export default function Home() {
         />
       </div>
 
+
        <div className={styles.responsiveCard}>
-       <div style={{fontSize:"24px", textAlign:"center", fontWeight:"bold"}} >
-          Welcome to GEA Templay App
+        <div style={{display: 'flex',justifyContent: 'center', alignItems: 'flex-start', flexDirection:'column'}}>
+       <div style={{fontSize:"48px", textAlign:"left", fontWeight:"bold", marginBottom:"48px"}} >
+          <p>GEA Templay App</p>
+          <p style={{fontSize:'20px', marginTop:'18px', fontWeight:'500'}}>Where simplicity meets creativity in content design</p>
         </div>
-        <div style={{fontSize:"18px", textAlign:"center", marginBottom:'32px'}}>
-        Where simplicity meets creativity in content design
+        <div style={{fontSize:"18px", textAlign:"left", marginBottom:'32px'}}>
+        <p style={{border:'1px solid #020281', marginBottom:'12px', padding:'16px', }}>Dashboard with templates overview</p>
+        <p style={{border:'1px solid #020281', marginBottom:'12px', padding:'16px'}}>Create desired layouts or templates of different pages</p>
+        <p style={{border:'1px solid #020281', marginBottom:'12px', padding:'16px'}}>Option to share template with colleagues</p>
+        </div>
         </div>
           <div style={{ marginTop: '20px' }}>
           <Link href="/dashboard" passHref>
@@ -33,6 +40,7 @@ export default function Home() {
             />
           </Link>
           </div>
+          <p>A tool by Group Communications and Brand | Digital Channels</p>
         </div> 
         </div>  );  
 }

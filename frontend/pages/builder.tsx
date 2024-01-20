@@ -19,13 +19,12 @@ import {
   IconButton,
   useOutsideClick,
 } from "@chakra-ui/react";
-import Sidebar from "../components/layout/modal";
+import Sidebar from "../components/layout/sidebar";
 import TemplateArea from "../components/builder/templatearea";
 import { GridLayoutType } from "../components/builder/gridcomponent";
-import MainButton from "@/components/ui/mainbutton";
-import SecondaryButton from "@/components/ui/secondarybutton";
 import { useRouter } from "next/router";
 import { ChevronDownIcon } from "@chakra-ui/icons";
+import Modals from "../components/layout/modal";
 
 export interface DraggableItem {
   id: string;
@@ -63,6 +62,8 @@ function Builder() {
   const router = useRouter();
   const [templateTitles, setTemplateTitles] = useState<string[]>([]);
   const [filteredTitles, setFilteredTitles] = useState<string[]>([]);
+  const [isTitleValid, setIsTitleValid] = useState(true);
+  const [isItemsValid, setIsItemsValid] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -189,6 +190,16 @@ function Builder() {
   }, [isTemplateUnsavedAlertVisible]);
 
   useEffect(() => {
+    let timer: string | number | NodeJS.Timeout | undefined;
+    if (isItemsValid) {
+      timer = setTimeout(() => {
+        setIsItemsValid(false);
+      }, 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [isItemsValid]);
+
+  useEffect(() => {
     const fetchTemplateTitles = async () => {
       try {
         const response = await fetch('http://localhost:4000/api');
@@ -271,6 +282,24 @@ function Builder() {
   };
 
   const handleSaveTemplate = async () => {
+  // Validate title
+  if (!title.trim()) {
+    setIsTitleValid(false);
+    return;
+  }
+  setIsTitleValid(true);
+
+  // Validate items
+  if (droppedItems.length === 0) {
+    setIsItemsValid(false);
+    // Set a timeout to reset the alert
+    setTimeout(() => {
+      setIsItemsValid(true);
+    });
+    return;
+  }
+  setIsItemsValid(true);
+
     try {
       const response = await fetch("http://localhost:4000/api/templates", {
         method: "POST",
@@ -283,6 +312,7 @@ function Builder() {
         setIsDuplicateTitle(true);
         return;
       }
+      
 
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -420,8 +450,38 @@ function Builder() {
     setIsTemplateUnsavedAlertVisible(false);
   };
 
+    // Functions to pass as props to the Sidebar
+    const onOpenTutorial = () => {
+      // Implement the logic for opening the tutorial
+    };
+  
+    const onSave = () => {
+      onSaveModalOpen(); // This might open the save modal
+    };
+  
+    const onRetrieve = () => {
+      onRetrieveModalOpen(); // This might open the retrieve modal
+    };
+  
+    const onDelete = () => {
+      handleDeleteTemplate(); // Logic to delete a template
+    };
+  
+    const onPreview = () => {
+      handlePreview(); // Logic to preview a template
+    };
+
   return (
-    <Box w="100vw" h="100vh" bg="#EBEBEB">
+    <Flex w="100vw" h="100vh" bg="#EBEBEB">
+      <Sidebar
+        onOpenTutorial={onOpenTutorial}
+        onSave={onSave}
+        onRetrieve={onRetrieve}
+        onDelete={onDelete}
+        onPreview={onPreview}
+        isBuilderPage={true}
+        isCollapsed={false} isPreviewPage={false}      />
+      <Box flex="1" overflowY="auto">
       <VStack spacing={0} h="100%" position="relative">
         <TemplateArea
           items={droppedItems}
@@ -435,7 +495,7 @@ function Builder() {
           onGridTextChange={handleGridTextChange}
           onComponentAdd={(type, layoutType, gridId) => {}}
         />
-        <Sidebar
+        <Modals
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onSelect={handleComponentSelection}
@@ -451,8 +511,17 @@ function Builder() {
             <Input
               placeholder="Template Title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                setIsTitleValid(true);
+              }}
+              isInvalid={!isTitleValid}
             />
+            {!isTitleValid && (
+              <p>
+                Template title is required.
+              </p>
+            )}
             <ol style={{ paddingLeft: "20px", marginTop: "16px" }}>
               <li style={{ marginBottom: "16px" }}>
                 We recommend having the next title style:
@@ -552,69 +621,56 @@ function Builder() {
       </ModalFooter>
     </ModalContent>
   </Modal>
-
-      {isDuplicateTitle && (
-        <Alert status="error">
+  {isDuplicateTitle && (
+        <Alert status="error" position="fixed" bottom="10px" left="50%" transform="translateX(-50%)" zIndex="1100">
           <AlertIcon />A template with this title already exists. Please use a
           different title.
         </Alert>
       )}
 
       {isSaveSuccess && (
-        <Alert status="success">
+        <Alert status="success" position="fixed" bottom="10px" left="50%" transform="translateX(-50%)" zIndex="1100">
           <AlertIcon />
           Template saved successfully
         </Alert>
       )}
 
       {isRetrieveSuccess && (
-        <Alert status="success">
+        <Alert status="success" position="fixed" bottom="10px" left="50%" transform="translateX(-50%)" zIndex="1100">
           <AlertIcon />
           Template successfully retrieved
         </Alert>
       )}
 
       {isTemplateNotFound && (
-        <Alert status="error">
+        <Alert status="error" position="fixed" bottom="10px" left="50%" transform="translateX(-50%)" zIndex="1100">
           <AlertIcon />
           Template with this title does not exist!
         </Alert>
       )}
 
       {isDeleteSuccess && (
-        <Alert status="success">
+        <Alert status="success" position="fixed" bottom="10px" left="50%" transform="translateX(-50%)" zIndex="1100">
           <AlertIcon />
           Template deleted successfully!
         </Alert>
       )}
 
+      {isItemsValid && (
+          <Alert status="error" position="fixed" bottom="10px" left="50%" transform="translateX(-50%)" zIndex="1100">
+            <AlertIcon />
+            Cannot save an empty template. Please add some items.
+          </Alert>
+       )}
+
       {isTemplateUnsavedAlertVisible && (
-        <Alert status="error">
+        <Alert status="error" position="fixed" bottom="10px" left="50%" transform="translateX(-50%)" zIndex="1100">
           <AlertIcon />
           Save the template before previewing.
         </Alert>
       )}
-
-      <HStack spacing={4} justify="center" align="center" marginTop="16px">
-        <MainButton text="Save Template" onClick={onSaveModalOpen} />
-        <SecondaryButton
-          text="Retrieve Template"
-          onClick={onRetrieveModalOpen}
-        />
-        <SecondaryButton
-          text="Delete Template"
-          onClick={handleDeleteTemplate}
-          style={{ borderColor: "#ff0000" }}
-          textColor="#020281"
-        />
-        <SecondaryButton
-          text="Preview Template"
-          onClick={handlePreview}
-          style={{ borderColor: "#FF80FF" }}
-          textColor="#020281"
-        />
-      </HStack>
     </Box>
+    </Flex>
   );
 }
 

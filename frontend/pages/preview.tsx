@@ -5,6 +5,7 @@ import GridComponent from "../components/builder/gridcomponent";
 import PageContent from "../components/builder/pagecontent";
 import RichText from "../components/builder/richtext";
 import ImageBlock from "../components/builder/image";
+import Sidebar from "../components/layout/sidebar";
 import { useRouter } from "next/router";
 import SecondaryButton from "@/components/ui/secondarybutton";
 import { Box, HStack, Input, Flex, IconButton, useOutsideClick, Alert, AlertIcon, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Button, useDisclosure } from "@chakra-ui/react";
@@ -107,6 +108,13 @@ function PreviewPage() {
     onRetrieveModalClose();
   };
 
+      const onRetrieve = () => {
+        onRetrieveModalOpen(); // This might open the retrieve modal
+      };
+      const onPreview = () => {
+        handlePreview(); // Logic to preview a template
+      };
+
   const renderItem = (item: any, index: any) => {
     const key = item.type === "GRID" ? `GRID-${index}` : item.id;
 
@@ -164,7 +172,19 @@ function PreviewPage() {
   };
 
   return (
-    <Box w="100vw" h="100vh" bg="#EBEBEB">
+    <Flex w="100vw" h="100vh" bg="#EBEBEB">
+      <Sidebar
+        onRetrieve={onRetrieve}
+        onPreview={onPreview}
+        isPreviewPage={true}
+        isCollapsed={false} onOpenTutorial={function (): void {
+          throw new Error("Function not implemented.");
+        } } onSave={function (): void {
+          throw new Error("Function not implemented.");
+        } } onDelete={function (): void {
+          throw new Error("Function not implemented.");
+        } } isBuilderPage={false}      />
+      <Box flex="1" overflowY="auto" marginLeft='16px' marginRight='16px'>
       <img src="/assets/header.png" alt="Header" />
       {items.length > 0 ? (
         items.map(renderItem)
@@ -249,7 +269,12 @@ function PreviewPage() {
         />
       </HStack>
     </Box>
+    </Flex>
   );
 }
 
 export default PreviewPage;
+function handlePreview() {
+  throw new Error("Function not implemented.");
+}
+
