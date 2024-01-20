@@ -1,8 +1,8 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import { AppProps } from 'next/app';
-import { ChakraProvider, VStack } from '@chakra-ui/react';
-import Header from '../components/layout/header'; // Ensure correct path
+import React, { useState, useEffect } from "react";
+import { AppProps } from "next/app";
+import { ChakraProvider, VStack } from "@chakra-ui/react";
+import Header from "../components/layout/header"; // Ensure correct path
 
 function MyApp({ Component, pageProps }: AppProps) {
   useEffect(() => {

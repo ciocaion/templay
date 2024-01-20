@@ -1,15 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import { VStack, Text, HStack, Box, Slider, SliderTrack, SliderFilledTrack, SliderThumb, Button, Flex } from '@chakra-ui/react';
-import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
-import Banner from '../components/builder/banner';
-import Hero from '@/components/builder/hero';
-import Sidebar from '../components/layout/sidebar';
-import ImageBlock from '@/components/builder/image';
-import PageContent from '@/components/builder/pagecontent';
-import GridComponent from '@/components/builder/gridcomponent';
-import RichText from '@/components/builder/richtext';
-import IntroModal from '@/components/layout/introModal';
-import TutorialModal from '@/components/layout/tutorialModal';
+import React, { useEffect, useState } from "react";
+import {
+  VStack,
+  Text,
+  HStack,
+  Box,
+  Slider,
+  SliderTrack,
+  SliderFilledTrack,
+  SliderThumb,
+  Button,
+  Flex,
+} from "@chakra-ui/react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import Banner from "../components/builder/banner";
+import Hero from "@/components/builder/hero";
+import Sidebar from "../components/layout/sidebar";
+import ImageBlock from "@/components/builder/image";
+import PageContent from "@/components/builder/pagecontent";
+import RichText from "@/components/builder/richtext";
+import IntroModal from "@/components/layout/introModal";
+import TutorialModal from "@/components/layout/tutorialModal";
 
 interface ComponentProps {
   isSidebarCollapsed: boolean;
@@ -21,28 +31,30 @@ const Components: React.FC<ComponentProps> = ({ isSidebarCollapsed }) => {
   const [isTutorialOpen, setTutorialOpen] = useState(false);
 
   const components = [
-    { name: 'Banner', component: <Banner /> },
-    { name: 'Hero', component: <Hero /> },
-    { name: 'Image', component: <ImageBlock /> },
-    { name: 'Card Standard', component: <PageContent /> },
-    { name: 'Rich Text', component: <RichText /> },
+    { name: "Banner", component: <Banner /> },
+    { name: "Hero", component: <Hero /> },
+    { name: "Image", component: <ImageBlock /> },
+    { name: "Card Standard", component: <PageContent /> },
+    { name: "Rich Text", component: <RichText /> },
   ];
 
   const maxIndex = components.length - 1;
 
   const handlePrev = () => {
-    setSliderValue(oldValue => (oldValue > 0 ? oldValue - 1 : 0));
+    setSliderValue((oldValue) => (oldValue > 0 ? oldValue - 1 : 0));
   };
 
   const handleNext = () => {
-    setSliderValue(oldValue => (oldValue < maxIndex ? oldValue + 1 : maxIndex));
+    setSliderValue((oldValue) =>
+      oldValue < maxIndex ? oldValue + 1 : maxIndex
+    );
   };
 
   useEffect(() => {
-    const hasSeenIntro = localStorage.getItem('hasSeenIntro');
+    const hasSeenIntro = localStorage.getItem("hasSeenIntro");
     if (!hasSeenIntro) {
       setIntroOpen(true);
-      localStorage.setItem('hasSeenIntro', 'true');
+      localStorage.setItem("hasSeenIntro", "true");
     }
   }, []);
 
@@ -57,7 +69,7 @@ const Components: React.FC<ComponentProps> = ({ isSidebarCollapsed }) => {
 
   return (
     <>
-          <IntroModal
+      <IntroModal
         isOpen={isIntroOpen}
         onClose={() => setIntroOpen(false)}
         onStartTutorial={startTutorial}
@@ -68,29 +80,43 @@ const Components: React.FC<ComponentProps> = ({ isSidebarCollapsed }) => {
         onClose={() => setTutorialOpen(false)}
       />
       <HStack spacing={0}>
-        <Sidebar onOpenTutorial={openTutorial} isCollapsed={isSidebarCollapsed}  />
+        <Sidebar
+          onOpenTutorial={openTutorial}
+          isCollapsed={isSidebarCollapsed}
+        />
         <Box flex="1">
-        <Text fontSize="24px" fontWeight="bold" textAlign="center">
-              Available Components
-            </Text>
+          <Text fontSize="24px" fontWeight="bold" textAlign="center">
+            Available Components
+          </Text>
           <VStack spacing={4}>
             <Text fontSize="xl" fontWeight="bold" textAlign="center">
               {components[sliderValue].name}
             </Text>
-            <Box width="80%">
-              {components[sliderValue].component}
-            </Box>
+            <Box width="80%">{components[sliderValue].component}</Box>
             <Flex alignItems="center">
-              <Button onClick={handlePrev} leftIcon={<ChevronLeftIcon />} marginEnd={2}>
+              <Button
+                onClick={handlePrev}
+                leftIcon={<ChevronLeftIcon />}
+                marginEnd={2}
+              >
                 Prev
               </Button>
-              <Slider value={sliderValue} min={0} max={maxIndex} onChange={setSliderValue}>
+              <Slider
+                value={sliderValue}
+                min={0}
+                max={maxIndex}
+                onChange={setSliderValue}
+              >
                 <SliderTrack>
                   <SliderFilledTrack />
                 </SliderTrack>
                 <SliderThumb />
               </Slider>
-              <Button onClick={handleNext} rightIcon={<ChevronRightIcon />} marginStart={2}>
+              <Button
+                onClick={handleNext}
+                rightIcon={<ChevronRightIcon />}
+                marginStart={2}
+              >
                 Next
               </Button>
             </Flex>

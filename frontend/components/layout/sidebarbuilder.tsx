@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { Box, VStack, Flex, Text, Tooltip, Button } from '@chakra-ui/react';
-import SaveIcon from '@mui/icons-material/Save';
-import RetrieveIcon from '@mui/icons-material/GetApp'; // Example icon for Retrieve
-import DeleteIcon from '@mui/icons-material/Delete';
-import PreviewIcon from '@mui/icons-material/Visibility';
-import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import React, { useState } from "react";
+import { Box, VStack, Flex, Text, Tooltip, Button } from "@chakra-ui/react";
+import SaveIcon from "@mui/icons-material/Save";
+import RetrieveIcon from "@mui/icons-material/GetApp"; // Example icon for Retrieve
+import DeleteIcon from "@mui/icons-material/Delete";
+import PreviewIcon from "@mui/icons-material/Visibility";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 interface SidebarProps {
   onSave: () => void;
@@ -16,30 +16,60 @@ interface SidebarProps {
   children?: React.ReactNode;
 }
 
-const SidebarBuilder: React.FC<SidebarProps> = ({  onSave, onRetrieve, onDelete, onPreview }) => {
+const SidebarBuilder: React.FC<SidebarProps> = ({
+  onSave,
+  onRetrieve,
+  onDelete,
+  onPreview,
+}) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
   };
 
-  const textStyle = { display: isCollapsed ? 'none' : 'block' };
-  const iconStyle = { color: 'white', cursor: 'pointer', marginRight: '12px' };
-  const buttonStyle = { width: '100%', justifyContent: 'flex-start' };
-
+  const textStyle = { display: isCollapsed ? "none" : "block" };
+  const iconStyle = { color: "white", cursor: "pointer", marginRight: "12px" };
+  const buttonStyle = { width: "100%", justifyContent: "flex-start" };
 
   return (
-    <Box w={isCollapsed ? '60px' : '250px'} h="100vh" bg="#020281" p={4} paddingTop="56px">
+    <Box
+      w={isCollapsed ? "60px" : "250px"}
+      h="100vh"
+      bg="#020281"
+      p={4}
+      paddingTop="56px"
+    >
       <VStack spacing={6} align="stretch" color="white">
-      <Flex align="left" justify="left" mb={12}>
-        {isCollapsed ? (
-          <Tooltip label="Expand sidebar" placement="right">
-          <ArrowForwardIosIcon style={{ color: '#020281', cursor: 'pointer', border: '2px solid white', backgroundColor:'white', borderRadius:'20px', marginRight:'12px' }} onClick={toggleSidebar} />
-          </Tooltip>
-        ) : (
-          <ArrowBackIosNewIcon style={{ color: '#020281', cursor: 'pointer', border: '2px solid white', backgroundColor:'white', borderRadius:'20px',marginRight:'12px' }} onClick={toggleSidebar} />
-        )}
-            <Text
+        <Flex align="left" justify="left" mb={12}>
+          {isCollapsed ? (
+            <Tooltip label="Expand sidebar" placement="right">
+              <ArrowForwardIosIcon
+                style={{
+                  color: "#020281",
+                  cursor: "pointer",
+                  border: "2px solid white",
+                  backgroundColor: "white",
+                  borderRadius: "20px",
+                  marginRight: "12px",
+                }}
+                onClick={toggleSidebar}
+              />
+            </Tooltip>
+          ) : (
+            <ArrowBackIosNewIcon
+              style={{
+                color: "#020281",
+                cursor: "pointer",
+                border: "2px solid white",
+                backgroundColor: "white",
+                borderRadius: "20px",
+                marginRight: "12px",
+              }}
+              onClick={toggleSidebar}
+            />
+          )}
+          <Text
             style={textStyle}
             fontSize="md"
             onClick={toggleSidebar}
@@ -47,7 +77,7 @@ const SidebarBuilder: React.FC<SidebarProps> = ({  onSave, onRetrieve, onDelete,
           >
             Collapse sidebar
           </Text>
-      </Flex>
+        </Flex>
         {/* Save Template */}
         <Flex align="center">
           {isCollapsed ? (
@@ -55,7 +85,13 @@ const SidebarBuilder: React.FC<SidebarProps> = ({  onSave, onRetrieve, onDelete,
               <SaveIcon style={iconStyle} onClick={onSave} />
             </Tooltip>
           ) : (
-            <Button backgroundColor="#1AFF80" style={buttonStyle} onClick={onSave}>Save Template</Button>
+            <Button
+              backgroundColor="#1AFF80"
+              style={buttonStyle}
+              onClick={onSave}
+            >
+              Save Template
+            </Button>
           )}
         </Flex>
 
@@ -66,7 +102,13 @@ const SidebarBuilder: React.FC<SidebarProps> = ({  onSave, onRetrieve, onDelete,
               <RetrieveIcon style={iconStyle} onClick={onRetrieve} />
             </Tooltip>
           ) : (
-            <Button backgroundColor="#FF80FF" style={buttonStyle} onClick={onRetrieve}>Retrieve Template</Button>
+            <Button
+              backgroundColor="#FF80FF"
+              style={buttonStyle}
+              onClick={onRetrieve}
+            >
+              Retrieve Template
+            </Button>
           )}
         </Flex>
 
@@ -77,7 +119,9 @@ const SidebarBuilder: React.FC<SidebarProps> = ({  onSave, onRetrieve, onDelete,
               <DeleteIcon style={iconStyle} onClick={onDelete} />
             </Tooltip>
           ) : (
-            <Button colorScheme="red" style={buttonStyle} onClick={onDelete}>Delete Template</Button>
+            <Button colorScheme="red" style={buttonStyle} onClick={onDelete}>
+              Delete Template
+            </Button>
           )}
         </Flex>
 
@@ -88,7 +132,13 @@ const SidebarBuilder: React.FC<SidebarProps> = ({  onSave, onRetrieve, onDelete,
               <PreviewIcon style={iconStyle} onClick={onPreview} />
             </Tooltip>
           ) : (
-            <Button backgroundColor="#1F9DFF" style={buttonStyle} onClick={onPreview}>Preview Template</Button>
+            <Button
+              backgroundColor="#1F9DFF"
+              style={buttonStyle}
+              onClick={onPreview}
+            >
+              Preview Template
+            </Button>
           )}
         </Flex>
       </VStack>
