@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { HStack, Box, Text, VStack, Flex, IconButton } from '@chakra-ui/react';
-import TutorialModal from '../components/layout/tutorialModal';
-
+import React, { useState, useEffect } from "react";
+import { HStack, Box, Text, VStack, Flex, IconButton } from "@chakra-ui/react";
+import TutorialModal from "../components/layout/tutorialModal";
 
 interface AboutProps {
   isSidebarCollapsed: boolean;

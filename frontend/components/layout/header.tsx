@@ -1,10 +1,9 @@
-import React from 'react';
-import { Flex, Image, IconButton } from '@chakra-ui/react';
-import Link from 'next/link';
-
+import React from "react";
+import { Flex, Image, IconButton } from "@chakra-ui/react";
+import Link from "next/link";
 
 function Header() {
-  const bgColor = '#000F41';
+  const bgColor = "#000F41";
 
   return (
     <Flex
@@ -17,10 +16,10 @@ function Header() {
       color="white"
     >
       <Link href="/dashboard">
-          <Image src="/assets/logo.png" alt="Logo" h="16px" ml={2} />
+        <Image src="/assets/logo.png" alt="Logo" h="16px" ml={2} />
       </Link>
     </Flex>
   );
-};
+}
 
 export default Header;

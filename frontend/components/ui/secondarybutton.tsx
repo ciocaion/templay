@@ -3,13 +3,19 @@ import { Box, Text } from "@chakra-ui/react";
 
 interface SecondButtonProps {
   text: string;
-  onClick?: () => void;  // Optional onClick handler
+  onClick?: () => void; // Optional onClick handler
   icon?: React.ReactNode; // Optional icon
   style?: React.CSSProperties;
   textColor?: string;
 }
 
-function SecondaryButton({ text, onClick, icon, style, textColor  }: SecondButtonProps) {
+function SecondaryButton({
+  text,
+  onClick,
+  icon,
+  style,
+  textColor,
+}: SecondButtonProps) {
   return (
     <Box
       onClick={onClick} // Attach the onClick event
@@ -24,19 +30,23 @@ function SecondaryButton({ text, onClick, icon, style, textColor  }: SecondButto
       gap="1rem"
       borderRadius="50px"
       padding="0 1rem"
-      _hover={{ backgroundColor: "#E6E6F8" }} 
+      _hover={{ backgroundColor: "#E6E6F8" }}
       cursor="pointer"
       style={{ ...style }}
     >
       <Text
-       color={textColor || "#020281"}
+        color={textColor || "#020281"}
         textAlign="center"
-        fontSize="1rem" 
+        fontSize="1rem"
         fontWeight="semibold"
       >
         {text}
       </Text>
-      {icon && <Box ml="0px" display="flex" alignItems="center">{icon}</Box>}
+      {icon && (
+        <Box ml="0px" display="flex" alignItems="center">
+          {icon}
+        </Box>
+      )}
     </Box>
   );
 }

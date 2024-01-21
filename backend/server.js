@@ -36,7 +36,7 @@ app.use(express_1.default.json());
 // });
 app.post('/api/templates', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { items, title } = req.body;
+        const { items, title, seo, alt } = req.body;
         console.log(`Checking for existing template with title: '${title}'`);
         if (typeof title !== 'string') {
             console.error('Invalid title format:', title);
@@ -52,8 +52,10 @@ app.post('/api/templates', (req, res) => __awaiter(void 0, void 0, void 0, funct
             res.status(409).json({ message: 'A template with this title already exists.' });
             return;
         }
-        const insertSql = `INSERT INTO templates (template_json, title) VALUES (?, ?)`;
-        yield conn.query(insertSql, [JSON.stringify(items), title]);
+        const seoValue = seo || '';
+        const altValue = JSON.stringify(alt || {});
+        const insertSql = `INSERT INTO templates (template_json, title, seo, alt) VALUES (?, ?, ?, ?)`;
+        yield conn.query(insertSql, [JSON.stringify(items), title, seoValue, altValue]);
         conn.release();
         res.status(200).json({ message: 'Template saved successfully' });
     }

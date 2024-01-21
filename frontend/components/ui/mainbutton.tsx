@@ -3,12 +3,11 @@ import { Box, Text } from "@chakra-ui/react";
 
 interface MainButtonProps {
   text: string;
-  onClick?: () => void;  // Optional onClick handler
+  onClick?: () => void; // Optional onClick handler
   icon?: React.ReactNode; // Optional icon
 }
 
-
-function MainButton({ text, onClick, icon }: MainButtonProps){
+function MainButton({ text, onClick, icon }: MainButtonProps) {
   return (
     <Box
       display="flex"
@@ -21,19 +20,23 @@ function MainButton({ text, onClick, icon }: MainButtonProps){
       borderRadius="50px"
       padding="0 1rem"
       _hover={{ backgroundColor: "#4F4FCD" }}
-      cursor="pointer" 
+      cursor="pointer"
       textDecor="none"
       onClick={onClick}
     >
       <Text
         color="#ffffff"
         textAlign="center"
-        fontSize="1rem" 
+        fontSize="1rem"
         fontWeight="semibold"
       >
         {text}
       </Text>
-      {icon && <Box ml="0px" display="flex" alignItems="center">{icon}</Box>}
+      {icon && (
+        <Box ml="0px" display="flex" alignItems="center">
+          {icon}
+        </Box>
+      )}
     </Box>
   );
 }

@@ -6,10 +6,11 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import AppsIcon from "@mui/icons-material/Apps";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import SaveIcon from "@mui/icons-material/Save";           
-import RetrieveIcon from "@mui/icons-material/GetApp";   
-import DeleteIcon from "@mui/icons-material/Delete";     
-import PreviewIcon from "@mui/icons-material/Preview"; 
+import SaveIcon from "@mui/icons-material/Save";
+import RetrieveIcon from "@mui/icons-material/GetApp";
+import DeleteIcon from "@mui/icons-material/Delete";
+import PreviewIcon from "@mui/icons-material/Preview";
+import ShareIcon from "@mui/icons-material/Share";
 
 interface SidebarProps {
   onOpenTutorial: () => void;
@@ -17,9 +18,10 @@ interface SidebarProps {
   onRetrieve: () => void;
   onDelete: () => void;
   onPreview: () => void;
+  onOpenMetadata: () => void;
   isCollapsed: boolean;
   isBuilderPage: boolean;
-  isPreviewPage:boolean;
+  isPreviewPage: boolean;
   children?: React.ReactNode;
 }
 
@@ -29,8 +31,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   onRetrieve,
   onDelete,
   onPreview,
+  onOpenMetadata,
   isBuilderPage,
-  isPreviewPage
+  isPreviewPage,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -38,13 +41,15 @@ const Sidebar: React.FC<SidebarProps> = ({
     setIsCollapsed(!isCollapsed);
   };
 
-  const iconStyle = { marginRight: isCollapsed ? "0" : "12px", color: "white" };
-  const textStyle = { display: isCollapsed ? "none" : "block" };
+  const textStyle = {
+    display: isCollapsed ? "none" : "block",
+    marginLeft: "12px",
+  };
   const buttonStyle = {
-    width: '100%', 
-    justifyContent: 'center', 
-    display: 'flex', 
-    alignItems: 'center'
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: isCollapsed ? "center" : "flex-start",
   };
 
   const handleCreateTemplateClick = () => {
@@ -59,6 +64,18 @@ const Sidebar: React.FC<SidebarProps> = ({
     window.location.href = "/components";
   };
 
+  const handleShareClick = () => {
+    const url = window.location.href; // Gets the current URL
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        alert("URL copied to clipboard!"); // You can replace this with a more sophisticated notification
+      })
+      .catch((err) => {
+        console.error("Could not copy text: ", err);
+      });
+  };
+
   return (
     <Box
       w={isCollapsed ? "72px" : "250px"}
@@ -66,8 +83,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       bg="#020281"
       p={4}
       paddingTop="56px"
-      display='flex'
-      flexDirection='column'
+      display="flex"
+      flexDirection="column"
     >
       <VStack spacing={6} align="stretch" color="white">
         <Flex align="left" justify="left" mb={12}>
@@ -81,6 +98,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                   backgroundColor: "white",
                   borderRadius: "20px",
                   marginRight: "12px",
+                  width: "20px",
+                  height: "20px",
                 }}
                 onClick={toggleSidebar}
               />
@@ -94,6 +113,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                 backgroundColor: "white",
                 borderRadius: "20px",
                 marginRight: "12px",
+                width: "20px",
+                height: "20px",
               }}
               onClick={toggleSidebar}
             />
@@ -111,10 +132,24 @@ const Sidebar: React.FC<SidebarProps> = ({
           {isCollapsed ? (
             // Add Tooltip to the icon when collapsed
             <Tooltip label="Create New Template" placement="right">
-              <AddIcon style={iconStyle} onClick={handleCreateTemplateClick} />
+              <AddIcon
+                style={{
+                  color: "white",
+                  width: "20px",
+                  height: "20px",
+                }}
+                onClick={handleCreateTemplateClick}
+              />
             </Tooltip>
           ) : (
-            <AddIcon style={iconStyle} onClick={handleCreateTemplateClick} />
+            <AddIcon
+              style={{
+                color: "white",
+                width: "20px",
+                height: "20px",
+              }}
+              onClick={handleCreateTemplateClick}
+            />
           )}
           <Text
             style={textStyle}
@@ -129,10 +164,24 @@ const Sidebar: React.FC<SidebarProps> = ({
           {isCollapsed ? (
             // Add Tooltip to the icon when collapsed
             <Tooltip label="About" placement="right">
-              <InfoIcon style={iconStyle} onClick={handleAboutClick} />
+              <InfoIcon
+                style={{
+                  color: "white",
+                  width: "20px",
+                  height: "20px",
+                }}
+                onClick={handleAboutClick}
+              />
             </Tooltip>
           ) : (
-            <InfoIcon style={iconStyle} onClick={handleAboutClick} />
+            <InfoIcon
+              style={{
+                color: "white",
+                width: "20px",
+                height: "20px",
+              }}
+              onClick={handleAboutClick}
+            />
           )}
           <Text
             style={textStyle}
@@ -143,33 +192,62 @@ const Sidebar: React.FC<SidebarProps> = ({
             About
           </Text>
         </Flex>
-        {!isPreviewPage && !isBuilderPage &&(
-        <Flex align="center">
-          {isCollapsed ? (
-            // Add Tooltip to the icon when collapsed
-            <Tooltip label="View Components" placement="right">
-              <AppsIcon style={iconStyle} onClick={handleComponentsClick} />
-            </Tooltip>
-          ) : (
-            <AppsIcon style={iconStyle} onClick={handleComponentsClick} />
-          )}
-          <Text
-            style={textStyle}
-            fontSize="md"
-            onClick={handleComponentsClick}
-            cursor="pointer"
-          >
-            View Components
-          </Text>
-        </Flex>)}
-        {!isPreviewPage && !isBuilderPage &&(
+        {!isPreviewPage && !isBuilderPage && (
+          <Flex align="center">
+            {isCollapsed ? (
+              // Add Tooltip to the icon when collapsed
+              <Tooltip label="View Components" placement="right">
+                <AppsIcon
+                  style={{
+                    color: "white",
+                    width: "20px",
+                    height: "20px",
+                  }}
+                  onClick={handleComponentsClick}
+                />
+              </Tooltip>
+            ) : (
+              <AppsIcon
+                style={{
+                  color: "white",
+                  width: "20px",
+                  height: "20px",
+                }}
+                onClick={handleComponentsClick}
+              />
+            )}
+            <Text
+              style={textStyle}
+              fontSize="md"
+              onClick={handleComponentsClick}
+              cursor="pointer"
+            >
+              View Components
+            </Text>
+          </Flex>
+        )}
+        {!isPreviewPage && !isBuilderPage && (
           <Flex align="center">
             {isCollapsed ? (
               <Tooltip label="View Tutorial" placement="right">
-                <VisibilityIcon style={iconStyle} onClick={onOpenTutorial} />
+                <VisibilityIcon
+                  style={{
+                    color: "white",
+                    width: "20px",
+                    height: "20px",
+                  }}
+                  onClick={onOpenTutorial}
+                />
               </Tooltip>
             ) : (
-              <VisibilityIcon style={iconStyle} onClick={onOpenTutorial} />
+              <VisibilityIcon
+                style={{
+                  color: "white",
+                  width: "20px",
+                  height: "20px",
+                }}
+                onClick={onOpenTutorial}
+              />
             )}
             <Text
               style={textStyle}
@@ -181,36 +259,80 @@ const Sidebar: React.FC<SidebarProps> = ({
             </Text>
           </Flex>
         )}
+
         {isBuilderPage && (
-          
           <>
             <Tooltip label="Save Template" placement="right">
-              <Button onClick={onSave} colorScheme="green" style={buttonStyle}>
-                <SaveIcon style={iconStyle} />
+              <Button
+                onClick={onSave}
+                colorScheme="green"
+                style={buttonStyle}
+                justifyContent={isCollapsed ? "center" : "flex-start"}
+              >
+                <SaveIcon
+                  style={{
+                    color: "white",
+                    width: "20px",
+                    height: "20px",
+                  }}
+                />
                 <Text style={textStyle} fontSize="md">
                   Save Template
                 </Text>
               </Button>
             </Tooltip>
             <Tooltip label="Retrieve Template" placement="right">
-              <Button onClick={onRetrieve} colorScheme="pink" style={buttonStyle}>
-                <RetrieveIcon style={iconStyle} />
+              <Button
+                onClick={onRetrieve}
+                colorScheme="pink"
+                style={buttonStyle}
+                justifyContent={isCollapsed ? "center" : "flex-start"}
+              >
+                <RetrieveIcon
+                  style={{
+                    color: "white",
+                    width: "20px",
+                    height: "20px",
+                  }}
+                />
                 <Text style={textStyle} fontSize="md">
                   Retrieve Template
                 </Text>
               </Button>
             </Tooltip>
             <Tooltip label="Delete Template" placement="right">
-              <Button onClick={onDelete} colorScheme="red" style={buttonStyle}>
-                <DeleteIcon style={iconStyle} />
+              <Button
+                onClick={onDelete}
+                colorScheme="red"
+                style={buttonStyle}
+                justifyContent={isCollapsed ? "center" : "flex-start"}
+              >
+                <DeleteIcon
+                  style={{
+                    color: "white",
+                    width: "20px",
+                    height: "20px",
+                  }}
+                />
                 <Text style={textStyle} fontSize="md">
                   Delete Template
                 </Text>
               </Button>
             </Tooltip>
             <Tooltip label="Preview Template" placement="right">
-              <Button onClick={onPreview} colorScheme="blue" style={buttonStyle}>
-                <PreviewIcon style={iconStyle} />
+              <Button
+                onClick={onPreview}
+                colorScheme="blue"
+                style={buttonStyle}
+                justifyContent={isCollapsed ? "center" : "flex-start"}
+              >
+                <PreviewIcon
+                  style={{
+                    color: "white",
+                    width: "20px",
+                    height: "20px",
+                  }}
+                />
                 <Text style={textStyle} fontSize="md">
                   Preview Template
                 </Text>
@@ -218,21 +340,69 @@ const Sidebar: React.FC<SidebarProps> = ({
             </Tooltip>
           </>
         )}
-                {isPreviewPage && (
+        {isPreviewPage && (
           <>
             <Tooltip label="Retrieve Template" placement="right">
-              <Button onClick={onRetrieve} colorScheme="pink" style={buttonStyle}>
-                <RetrieveIcon style={iconStyle} />
+              <Button
+                onClick={onRetrieve}
+                colorScheme="pink"
+                style={buttonStyle}
+                justifyContent={isCollapsed ? "center" : "flex-start"}
+              >
+                <RetrieveIcon
+                  style={{
+                    color: "white",
+                    width: "20px",
+                    height: "20px",
+                  }}
+                />
                 <Text style={textStyle} fontSize="md">
                   Retrieve Template
                 </Text>
               </Button>
             </Tooltip>
+            <Tooltip label="Metadata Information" placement="right">
+              <Button
+                onClick={onOpenMetadata}
+                colorScheme="yellow"
+                style={buttonStyle}
+                justifyContent={isCollapsed ? "center" : "flex-start"}
+              >
+                <InfoIcon
+                  style={{
+                    color: "white",
+                    width: "20px",
+                    height: "20px",
+                  }}
+                />
+                <Text style={textStyle} fontSize="md">
+                  Metadata Info
+                </Text>
+              </Button>
+            </Tooltip>
+            {/* <Tooltip label="Share Template" placement="right">
+    <Button
+      onClick={handleShareClick}
+      colorScheme="teal"
+      style={buttonStyle}
+      justifyContent={isCollapsed ? 'center' : 'flex-start'}
+    >
+      <ShareIcon
+        style={{
+          color: "white",
+          width: "20px",
+          height: "20px",
+        }}
+      />
+      <Text style={textStyle} fontSize="md">
+        Share Template
+      </Text>
+    </Button>
+  </Tooltip> */}
           </>
         )}
       </VStack>
     </Box>
   );
 };
-
 export default Sidebar;

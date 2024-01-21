@@ -8,8 +8,27 @@ import ImageBlock from "../components/builder/image";
 import Sidebar from "../components/layout/sidebar";
 import { useRouter } from "next/router";
 import SecondaryButton from "@/components/ui/secondarybutton";
-import { Box, HStack, Input, Flex, IconButton, useOutsideClick, Alert, AlertIcon, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Button, useDisclosure } from "@chakra-ui/react";
+import {
+  Box,
+  HStack,
+  Input,
+  Flex,
+  IconButton,
+  useOutsideClick,
+  Alert,
+  AlertIcon,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Button,
+  useDisclosure,
+} from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
+import ModalMetadata from "@/components/layout/modalMetadata";
 
 function PreviewPage() {
   const router = useRouter();
@@ -28,28 +47,32 @@ function PreviewPage() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [templateTitles, setTemplateTitles] = useState<string[]>([]);
   const [filteredTitles, setFilteredTitles] = useState<string[]>([]);
+  const [isMetadataModalOpen, setMetadataModalOpen] = useState(false);
+  const [metadataInfo, setMetadataInfo] = useState({ seo: "", alt: [] });
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchTemplateTitles = async () => {
       try {
-        const response = await fetch('http://localhost:4000/api');
+        const response = await fetch("http://localhost:4000/api");
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
         const templates = await response.json();
-  
+
         // Extract titles from the templates array
-        const titles = templates.map((template: { title: any; }) => template.title);
+        const titles = templates.map(
+          (template: { title: any }) => template.title
+        );
         setTemplateTitles(titles);
         setFilteredTitles(titles);
       } catch (error) {
-        console.error('Error fetching templates:', error);
+        console.error("Error fetching templates:", error);
         setTemplateTitles([]);
         setFilteredTitles([]);
       }
     };
-  
+
     fetchTemplateTitles();
   }, []);
 
@@ -66,7 +89,9 @@ function PreviewPage() {
     const input = e.target.value;
     setTitle(input);
     setIsDropdownOpen(true);
-    const filtered = templateTitles.filter(title => title.toLowerCase().includes(input.toLowerCase()));
+    const filtered = templateTitles.filter((title) =>
+      title.toLowerCase().includes(input.toLowerCase())
+    );
     setFilteredTitles(filtered);
   };
 
@@ -74,18 +99,20 @@ function PreviewPage() {
     setTitle(selectedTitle);
     setIsDropdownOpen(false);
     handleRetrieveTemplate(selectedTitle);
-  };  
+  };
 
-  const handleRetrieveButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleRetrieveButtonClick = (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
     e.preventDefault();
     handleRetrieveTemplate();
-  };  
+  };
 
   const handleRetrieveTemplate = async (templateTitle: string = title) => {
     try {
       const response = await fetch(
         `http://localhost:4000/api/templates/${templateTitle}`
-        );
+      );
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
@@ -101,19 +128,21 @@ function PreviewPage() {
       } else {
         setIsTemplateNotFound(true);
       }
+      await fetchMetadata(templateTitle);
     } catch (error) {
       console.error("Error retrieving template:", error);
       setIsTemplateNotFound(true);
     }
     onRetrieveModalClose();
+    fetchMetadata(templateTitle);
   };
 
-      const onRetrieve = () => {
-        onRetrieveModalOpen(); // This might open the retrieve modal
-      };
-      const onPreview = () => {
-        handlePreview(); // Logic to preview a template
-      };
+  const onRetrieve = () => {
+    onRetrieveModalOpen(); // This might open the retrieve modal
+  };
+  const onPreview = () => {
+    handlePreview(); // Logic to preview a template
+  };
 
   const renderItem = (item: any, index: any) => {
     const key = item.type === "GRID" ? `GRID-${index}` : item.id;
@@ -171,104 +200,149 @@ function PreviewPage() {
     }
   };
 
+  const fetchMetadata = async (templateTitle: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:4000/api/templates/${templateTitle}`
+      );
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const template = await response.json();
+      const seo = template.seo || "";
+      const alt = template.alt ? JSON.parse(template.alt) : [];
+      setMetadataInfo({ seo, alt });
+    } catch (error) {
+      console.error("Error fetching metadata:", error);
+    }
+  };
+
+  const onOpenMetadata = () => {
+    setMetadataModalOpen(true);
+  };
+
   return (
-    <Flex w="100vw" h="100vh" bg="#EBEBEB">
+    <Flex w="100vw" h="100vh" bg="#ffffff">
       <Sidebar
         onRetrieve={onRetrieve}
         onPreview={onPreview}
+        onOpenMetadata={() => setMetadataModalOpen(true)}
         isPreviewPage={true}
-        isCollapsed={false} onOpenTutorial={function (): void {
+        isCollapsed={false}
+        onOpenTutorial={function (): void {
           throw new Error("Function not implemented.");
-        } } onSave={function (): void {
+        }}
+        onSave={function (): void {
           throw new Error("Function not implemented.");
-        } } onDelete={function (): void {
+        }}
+        onDelete={function (): void {
           throw new Error("Function not implemented.");
-        } } isBuilderPage={false}      />
-      <Box flex="1" overflowY="auto" marginLeft='16px' marginRight='16px'>
-      <img src="/assets/header.png" alt="Header" />
-      {items.length > 0 ? (
-        items.map(renderItem)
-      ) : (
-        <p>No template data available to preview.</p>
-      )}
-      <img src="/assets/footer.png" alt="Footer" />
-      <Modal isOpen={isRetrieveModalOpen} onClose={onRetrieveModalClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Retrieve Template</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-          <Flex ref={ref} direction="column" position="relative" width="100%">
-            <Flex>
-              <Input
-                placeholder="Template Title"
-                value={title}
-                onChange={handleTitleInputChange}
-              />
-              <IconButton
-                aria-label="Open Dropdown"
-                marginLeft="12px"
-                icon={<ChevronDownIcon />}
-                onClick={toggleDropdown}
-              />
-            </Flex>
-            {isDropdownOpen && (
-              <Box
-                position="absolute"
-                marginTop="48px"
-                width="100%"
-                bg="white"
-                maxHeight="250px"
-                overflowY="auto"
-                border="1px solid"
-                borderColor="gray.200"
-                zIndex="1"
-              >
-                {filteredTitles.length > 0 ? (
-                  filteredTitles.map(t => (
-                    <Box
-                      key={t}
-                      p={2}
-                      borderBottom="1px solid"
-                      borderColor="gray.100"
-                      _hover={{ bg: "gray.50" }}
-                      onClick={() => handleTitleSelect(t)}
-                    >
-                      {t}
-                    </Box>
-                  ))
-                ) : (
-                  <Box p={2}>No Templates Found</Box>
-                )}
-              </Box>
-            )}
-          </Flex>
-        </ModalBody>
-          <ModalFooter>
-          <Button colorScheme="blue" mr={3} onClick={handleRetrieveButtonClick}>
-            Retrieve
-            </Button>
-            <Button variant="ghost" onClick={onRetrieveModalClose}>
-              Cancel
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+        }}
+        isBuilderPage={false}
+      />
+      <Box flex="1" overflowY="auto" marginLeft="16px" marginRight="16px">
+        <img src="/assets/header.png" alt="Header" />
+        {items.length > 0 ? (
+          items.map(renderItem)
+        ) : (
+          <p style={{ padding: "24px", fontWeight: "bold" }}>
+            No template data available to preview. Please retrieve a template!
+          </p>
+        )}
+        <img src="/assets/footer.png" alt="Footer" />
 
-      {isTemplateNotFound && (
-        <Alert status="error">
-          <AlertIcon />
-          Template with this title does not exist!
-        </Alert>
-      )}
-
-      <HStack spacing={4} justify="center" align="center" marginTop="16px">
-        <SecondaryButton
-          text="Retrieve Template"
-          onClick={onRetrieveModalOpen}
+        <ModalMetadata
+          isOpen={isMetadataModalOpen}
+          onClose={() => setMetadataModalOpen(false)}
+          metadataInfo={metadataInfo}
         />
-      </HStack>
-    </Box>
+
+        <Modal isOpen={isRetrieveModalOpen} onClose={onRetrieveModalClose}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Retrieve Template</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <Flex
+                ref={ref}
+                direction="column"
+                position="relative"
+                width="100%"
+              >
+                <Flex>
+                  <Input
+                    placeholder="Template Title"
+                    value={title}
+                    onChange={handleTitleInputChange}
+                  />
+                  <IconButton
+                    aria-label="Open Dropdown"
+                    marginLeft="12px"
+                    icon={<ChevronDownIcon />}
+                    onClick={toggleDropdown}
+                  />
+                </Flex>
+                {isDropdownOpen && (
+                  <Box
+                    position="absolute"
+                    marginTop="48px"
+                    width="100%"
+                    bg="white"
+                    maxHeight="250px"
+                    overflowY="auto"
+                    border="1px solid"
+                    borderColor="gray.200"
+                    zIndex="1"
+                  >
+                    {filteredTitles.length > 0 ? (
+                      filteredTitles.map((t) => (
+                        <Box
+                          key={t}
+                          p={2}
+                          borderBottom="1px solid"
+                          borderColor="gray.100"
+                          _hover={{ bg: "gray.50" }}
+                          onClick={() => handleTitleSelect(t)}
+                        >
+                          {t}
+                        </Box>
+                      ))
+                    ) : (
+                      <Box p={2}>No Templates Found</Box>
+                    )}
+                  </Box>
+                )}
+              </Flex>
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                colorScheme="blue"
+                mr={3}
+                onClick={handleRetrieveButtonClick}
+              >
+                Retrieve
+              </Button>
+              <Button variant="ghost" onClick={onRetrieveModalClose}>
+                Cancel
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {isTemplateNotFound && (
+          <Alert status="error">
+            <AlertIcon />
+            Template with this title does not exist!
+          </Alert>
+        )}
+
+        <HStack spacing={4} justify="center" align="center" marginTop="16px">
+          <SecondaryButton
+            text="Retrieve Template"
+            onClick={onRetrieveModalOpen}
+          />
+        </HStack>
+      </Box>
     </Flex>
   );
 }
@@ -277,4 +351,3 @@ export default PreviewPage;
 function handlePreview() {
   throw new Error("Function not implemented.");
 }
-

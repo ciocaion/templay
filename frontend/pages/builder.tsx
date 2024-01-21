@@ -38,6 +38,16 @@ export interface DraggableItem {
 }
 export interface DraggableItems extends Array<DraggableItem> {}
 
+interface AltItem {
+  title: string;
+  text: string;
+}
+
+interface MetadataInfo {
+  seo: string;
+  alt: AltItem[];
+}
+
 function Builder() {
   const [droppedItems, setDroppedItems] = useState<DraggableItems>([]);
   const [title, setTitle] = useState("");
@@ -55,15 +65,24 @@ function Builder() {
     onClose: onRetrieveModalClose,
   } = useDisclosure();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalStep, setModalStep] = useState(1);
   const [isDeleteSuccess, setIsDeleteSuccess] = useState(false);
   const [isTemplateNotFound, setIsTemplateNotFound] = useState(false);
-  const [isTemplateSaved, setIsTemplateSaved] = useState(false); 
-  const [isTemplateUnsavedAlertVisible, setIsTemplateUnsavedAlertVisible] = useState(false);
+  const [isTemplateSaved, setIsTemplateSaved] = useState(false);
+  const [isTemplateUnsavedAlertVisible, setIsTemplateUnsavedAlertVisible] =
+    useState(false);
+  const [seoText, setSeoText] = useState("");
+  const [imageAltData, setImageAltData] = useState([{ title: "", text: "" }]);
+  const [metadataInfo, setMetadataInfo] = useState<MetadataInfo>({
+    seo: "",
+    alt: [],
+  });
   const router = useRouter();
   const [templateTitles, setTemplateTitles] = useState<string[]>([]);
   const [filteredTitles, setFilteredTitles] = useState<string[]>([]);
   const [isTitleValid, setIsTitleValid] = useState(true);
-  const [isItemsValid, setIsItemsValid] = useState(true);
+  const [isSeoValid, setIsSeoValid] = useState(true);
+  const [isItemsValid, setIsItemsValid] = useState<null | boolean>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -171,6 +190,16 @@ function Builder() {
 
   useEffect(() => {
     let timer: string | number | NodeJS.Timeout | undefined;
+    if (isItemsValid === false) {
+      timer = setTimeout(() => {
+        setIsItemsValid(null);
+      }, 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [isItemsValid]);
+
+  useEffect(() => {
+    let timer: string | number | NodeJS.Timeout | undefined;
     if (isDeleteSuccess) {
       timer = setTimeout(() => {
         setIsDeleteSuccess(false);
@@ -178,6 +207,16 @@ function Builder() {
     }
     return () => clearTimeout(timer);
   }, [isDeleteSuccess]);
+
+  useEffect(() => {
+    let timer: string | number | NodeJS.Timeout | undefined;
+    if (isSaveSuccess) {
+      timer = setTimeout(() => {
+        setIsSaveSuccess(false);
+      }, 5000);
+    }
+    return () => clearTimeout(timer);
+  }, [isSaveSuccess]);
 
   useEffect(() => {
     let timer: string | number | NodeJS.Timeout | undefined;
@@ -190,38 +229,29 @@ function Builder() {
   }, [isTemplateUnsavedAlertVisible]);
 
   useEffect(() => {
-    let timer: string | number | NodeJS.Timeout | undefined;
-    if (isItemsValid) {
-      timer = setTimeout(() => {
-        setIsItemsValid(false);
-      }, 5000);
-    }
-    return () => clearTimeout(timer);
-  }, [isItemsValid]);
-
-  useEffect(() => {
     const fetchTemplateTitles = async () => {
       try {
-        const response = await fetch('http://localhost:4000/api');
+        const response = await fetch("http://localhost:4000/api");
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
         const templates = await response.json();
-  
+
         // Extract titles from the templates array
-        const titles = templates.map((template: { title: any; }) => template.title);
+        const titles = templates.map(
+          (template: { title: any }) => template.title
+        );
         setTemplateTitles(titles);
         setFilteredTitles(titles);
       } catch (error) {
-        console.error('Error fetching templates:', error);
+        console.error("Error fetching templates:", error);
         setTemplateTitles([]);
         setFilteredTitles([]);
       }
     };
-  
+
     fetchTemplateTitles();
   }, []);
-  
 
   const appendChildren = (
     id: string,
@@ -282,37 +312,43 @@ function Builder() {
   };
 
   const handleSaveTemplate = async () => {
-  // Validate title
-  if (!title.trim()) {
-    setIsTitleValid(false);
-    return;
-  }
-  setIsTitleValid(true);
+    // Check if SEO text is empty
+    if (!seoText.trim()) {
+      setIsSeoValid(false);
+      return;
+    }
+    // Validate title
+    if (!title.trim()) {
+      setIsTitleValid(false);
+      return;
+    }
+    setIsTitleValid(true);
 
-  // Validate items
-  if (droppedItems.length === 0) {
-    setIsItemsValid(false);
-    // Set a timeout to reset the alert
-    setTimeout(() => {
-      setIsItemsValid(true);
-    });
-    return;
-  }
-  setIsItemsValid(true);
+    // Validate items
+    if (droppedItems.length === 0) {
+      setIsItemsValid(false); // Set to false here if validation fails
+      return;
+    }
+    setIsItemsValid(true);
 
     try {
+      const seoValue = seoText || "";
+      const altValues = imageAltData;
       const response = await fetch("http://localhost:4000/api/templates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: droppedItems, title }),
+        body: JSON.stringify({
+          items: droppedItems,
+          title,
+          seo: seoValue,
+          alt: altValues,
+        }),
       });
-
       if (response.status === 409) {
         // If status is 409, it means a duplicate title exists
         setIsDuplicateTitle(true);
         return;
       }
-      
 
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -321,8 +357,12 @@ function Builder() {
       const responseData = await response.json();
       console.log("Save successful:", responseData);
       setIsSaveSuccess(true);
-      setIsTemplateSaved(true); 
+      setIsTemplateSaved(true);
       onSaveModalClose();
+      setMetadataInfo({
+        seo: seoValue,
+        alt: altValues as AltItem[], // Cast to the correct type if necessary
+      });
     } catch (error) {
       console.error("Error saving template:", error);
       setIsSaveSuccess(false);
@@ -342,7 +382,7 @@ function Builder() {
     }
     setTitle(input);
     // Ensure that templateTitles elements are strings
-    const filtered = templateTitles.filter(title => 
+    const filtered = templateTitles.filter((title) =>
       title.toLowerCase().includes(input.toLowerCase())
     );
     setFilteredTitles(filtered);
@@ -355,12 +395,13 @@ function Builder() {
     handleRetrieveTemplate(selectedTitle);
   };
 
-  const handleRetrieveButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleRetrieveButtonClick = (
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
     e.preventDefault(); // Prevent default behavior if needed
     handleRetrieveTemplate(title);
   };
 
-  
   const handleRetrieveTemplate = async (templateTitle: string = title) => {
     try {
       const response = await fetch(
@@ -377,12 +418,16 @@ function Builder() {
         typeof template.template_json === "string"
       ) {
         // Parse the JSON string to an object/array
-        const parsedTemplateJson = JSON.parse(template.template_json);
+        const parsedTemplateJson = JSON.parse(template.template_json || "[]");
 
         // Assuming parsedTemplateJson is an array of items
         setDroppedItems(parsedTemplateJson);
         setIsRetrieveSuccess(true); // Set success state to true
         setIsTemplateNotFound(false);
+        setMetadataInfo({
+          seo: template.seo || "",
+          alt: template.alt ? (JSON.parse(template.alt) as AltItem[]) : [],
+        });
       } else {
         console.log("Template not found or invalid format");
         setIsRetrieveSuccess(false); // Optionally, set to false if there's an error
@@ -426,23 +471,25 @@ function Builder() {
     }
   };
 
-    // Function to check if the template title exists in the database
-    const isTemplateInDatabase = async () => {
-      try {
-        const response = await fetch(`http://localhost:4000/api/templates/${title}`);
-        return response.ok; // If the template exists, response.ok will be true
-      } catch (error) {
-        console.error("Error checking template:", error);
-        return false;
-      }
-    };
+  // Function to check if the template title exists in the database
+  const isTemplateInDatabase = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:4000/api/templates/${title}`
+      );
+      return response.ok; // If the template exists, response.ok will be true
+    } catch (error) {
+      console.error("Error checking template:", error);
+      return false;
+    }
+  };
 
-    const handlePreview = async () => {
-      const templateExists = await isTemplateInDatabase();
-  
-      if (!isTemplateSaved && !templateExists) {
-        setIsTemplateUnsavedAlertVisible(true); // Show alert for unsaved template
-        return;
+  const handlePreview = async () => {
+    const templateExists = await isTemplateInDatabase();
+
+    if (!isTemplateSaved && !templateExists) {
+      setIsTemplateUnsavedAlertVisible(true); // Show alert for unsaved template
+      return;
     }
     // Serialize the items array to a JSON string
     const itemsJson = JSON.stringify(droppedItems);
@@ -450,26 +497,62 @@ function Builder() {
     setIsTemplateUnsavedAlertVisible(false);
   };
 
-    // Functions to pass as props to the Sidebar
-    const onOpenTutorial = () => {
-      // Implement the logic for opening the tutorial
-    };
-  
-    const onSave = () => {
-      onSaveModalOpen(); // This might open the save modal
-    };
-  
-    const onRetrieve = () => {
-      onRetrieveModalOpen(); // This might open the retrieve modal
-    };
-  
-    const onDelete = () => {
-      handleDeleteTemplate(); // Logic to delete a template
-    };
-  
-    const onPreview = () => {
-      handlePreview(); // Logic to preview a template
-    };
+  // Functions to pass as props to the Sidebar
+  const onOpenTutorial = () => {
+    // Implement the logic for opening the tutorial
+  };
+
+  const onSave = () => {
+    onSaveModalOpen(); // This might open the save modal
+  };
+
+  const onRetrieve = () => {
+    onRetrieveModalOpen(); // This might open the retrieve modal
+  };
+
+  const onDelete = () => {
+    handleDeleteTemplate(); // Logic to delete a template
+  };
+
+  const onPreview = () => {
+    handlePreview(); // Logic to preview a template
+  };
+
+  const handleImageTitleChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    const newValue = e.target.value;
+    setImageAltData((prevData) => {
+      const newData = [...prevData];
+      newData[index].title = newValue;
+      return newData;
+    });
+  };
+
+  const handleAltTextChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    const newValue = e.target.value;
+    setImageAltData((prevData) => {
+      const newData = [...prevData];
+      newData[index].text = newValue;
+      return newData;
+    });
+  };
+
+  const addImageAltField = () => {
+    setImageAltData((prevData) => [...prevData, { title: "", text: "" }]);
+  };
+
+  const handleNextClick = () => {
+    if (!seoText.trim()) {
+      setIsSeoValid(false);
+      return; // Prevent going to the next step
+    }
+    setModalStep(2);
+  };
 
   return (
     <Flex w="100vw" h="100vh" bg="#EBEBEB">
@@ -480,196 +563,310 @@ function Builder() {
         onDelete={onDelete}
         onPreview={onPreview}
         isBuilderPage={true}
-        isCollapsed={false} isPreviewPage={false}      />
+        isCollapsed={false}
+        isPreviewPage={false}
+      />
       <Box flex="1" overflowY="auto">
-      <VStack spacing={0} h="100%" position="relative">
-        <TemplateArea
-          items={droppedItems}
-          openModal={openModal}
-          appendChildren={appendChildren}
-          onDelete={handleDelete}
-          onHeroTextChange={handleHeroTextChange} // Ensure this is passed to TemplateArea
-          onBannerTextChange={handleBannerTextChange}
-          onCardTextChange={handleCardTextChange}
-          onRichTextChange={handleRichTextChange}
-          onGridTextChange={handleGridTextChange}
-          onComponentAdd={(type, layoutType, gridId) => {}}
-        />
-        <Modals
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onSelect={handleComponentSelection}
-        />
-      </VStack>
+        <VStack spacing={0} h="100%" position="relative">
+          <TemplateArea
+            items={droppedItems}
+            openModal={openModal}
+            appendChildren={appendChildren}
+            onDelete={handleDelete}
+            onHeroTextChange={handleHeroTextChange} // Ensure this is passed to TemplateArea
+            onBannerTextChange={handleBannerTextChange}
+            onCardTextChange={handleCardTextChange}
+            onRichTextChange={handleRichTextChange}
+            onGridTextChange={handleGridTextChange}
+            onComponentAdd={(type, layoutType, gridId) => {}}
+          />
+          <Modals
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSelect={handleComponentSelection}
+          />
+        </VStack>
 
-      <Modal isOpen={isSaveModalOpen} onClose={customOnSaveModalClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Save Template</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Input
-              placeholder="Template Title"
-              value={title}
-              onChange={(e) => {
-                setTitle(e.target.value);
-                setIsTitleValid(true);
-              }}
-              isInvalid={!isTitleValid}
-            />
-            {!isTitleValid && (
-              <p>
-                Template title is required.
-              </p>
-            )}
-            <ol style={{ paddingLeft: "20px", marginTop: "16px" }}>
-              <li style={{ marginBottom: "16px" }}>
-                We recommend having the next title style:
-                <p>
-                  <b>"your-page-name.gea.com-"</b>
-                </p>
-              </li>
-              <li style={{ marginBottom: "16px" }}>
-                After hyphen we should put the number of draft iteration,
-                example:
-                <p>
-                  <b>"-1" or "-2"</b>
-                </p>
-              </li>
-              <li style={{ marginBottom: "16px" }}>
-                Final title should be:
-                <p>
-                  <b>"your-page-name.gea.com-1"</b>
-                </p>
-              </li>
-            </ol>
-          </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleSaveTemplate}>
-              Save
-            </Button>
-            <Button variant="ghost" onClick={onSaveModalClose}>
-              Cancel
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+        <Modal isOpen={isSaveModalOpen} onClose={customOnSaveModalClose}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Save Template</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              {modalStep === 1 && (
+                <>
+                  <Input
+                    placeholder="SEO Text"
+                    value={seoText}
+                    onChange={(e) => setSeoText(e.target.value)}
+                    isInvalid={!isSeoValid}
+                  />
 
-      <Modal isOpen={isRetrieveModalOpen} onClose={customOnRetrieveModalClose}>
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>Retrieve Template</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-        <Flex ref={ref} direction="column" position="relative" width="100%">
-          <Flex>
-            <Input
-              placeholder="Template Title"
-              value={title}
-              onChange={handleTitleInputChange}
-            />
-            <IconButton
-              aria-label="Open Dropdown"
-              marginLeft="12px"
-              icon={<ChevronDownIcon />}
-              onClick={toggleDropdown}
-            />
-          </Flex>
-          {isDropdownOpen && (
-            <Box
-              position="absolute"
-              marginTop="48px"
-              width="100%"
-              bg="white"
-              maxHeight="250px"
-              overflowY="auto"
-              border="1px solid"
-              borderColor="gray.200"
-              zIndex="1"
-            >
-              {filteredTitles.length > 0 ? (
-                filteredTitles.map(t => (
-                  <Box
-                    key={t}
-                    p={2}
-                    borderBottom="1px solid"
-                    borderColor="gray.100"
-                    _hover={{ bg: "gray.50" }}
-                    onClick={() => {
-                      handleTitleSelect(t);
-                      setIsDropdownOpen(false);
-                    }}
-                  >
-                    {t}
-                  </Box>
-                ))
-              ) : (
-                <Box p={2}>No Templates Found</Box>
+                  {!isSeoValid && (
+                    <p style={{ color: "red", marginTop:'8px'}}>
+                      SEO is required.
+                    </p>
+                  )}
+                  {imageAltData.map((item, index) => (
+                    <div key={index}>
+                      <Input
+                        placeholder={`Image Title ${index + 1}`}
+                        value={item.title}
+                        onChange={(e) => handleImageTitleChange(e, index)}
+                        mt={4}
+                        mb={4}
+                      />
+                      <Input
+                        placeholder={`ALT Text ${index + 1}`}
+                        value={item.text}
+                        onChange={(e) => handleAltTextChange(e, index)}
+                        mb={4}
+                      />
+                    </div>
+                  ))}
+                  <Button colorScheme="blue" onClick={addImageAltField}>
+                    Add Image Title and ALT
+                  </Button>
+                </>
               )}
-            </Box>
-          )}
-        </Flex>
-      </ModalBody>
 
-      <ModalFooter>
-        <Button colorScheme="blue" mr={3} onClick={handleRetrieveButtonClick}>
-          Retrieve
-        </Button>
-        <Button variant="ghost" onClick={onRetrieveModalClose}>
-          Cancel
-        </Button>
-      </ModalFooter>
-    </ModalContent>
-  </Modal>
-  {isDuplicateTitle && (
-        <Alert status="error" position="fixed" bottom="10px" left="50%" transform="translateX(-50%)" zIndex="1100">
-          <AlertIcon />A template with this title already exists. Please use a
-          different title.
-        </Alert>
-      )}
+              {modalStep === 2 && (
+                <>
+                  <Input
+                    placeholder="Template Title"
+                    value={title}
+                    onChange={(e) => {
+                      setTitle(e.target.value);
+                      setIsTitleValid(true);
+                    }}
+                    isInvalid={!isTitleValid}
+                  />
+                  {!isTitleValid && <p style={{ color: "red", marginTop:'8px'}}>Template title is required.</p>}
+                  <ol style={{ paddingLeft: "20px", marginTop: "16px" }}>
+                    <li style={{ marginBottom: "16px" }}>
+                      We recommend having the next title style:
+                      <p>
+                        <b>"your-page-name.gea.com-"</b>
+                      </p>
+                    </li>
+                    <li style={{ marginBottom: "16px" }}>
+                      After hyphen we should put the number of draft iteration,
+                      example:
+                      <p>
+                        <b>"-1" or "-2"</b>
+                      </p>
+                    </li>
+                    <li style={{ marginBottom: "16px" }}>
+                      Final title should be:
+                      <p>
+                        <b>"your-page-name.gea.com-1"</b>
+                      </p>
+                    </li>
+                  </ol>
+                </>
+              )}
+            </ModalBody>
+            <ModalFooter>
+              {modalStep === 1 && (
+                <Button colorScheme="blue" onClick={handleNextClick}>
+                  Next
+                </Button>
+              )}
+              {modalStep === 2 && (
+                <>
+                  <Button
+                    colorScheme="blue"
+                    mr={3}
+                    onClick={handleSaveTemplate}
+                  >
+                    Save
+                  </Button>
+                  <Button variant="ghost" onClick={onSaveModalClose}>
+                    Cancel
+                  </Button>
+                </>
+              )}
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
 
-      {isSaveSuccess && (
-        <Alert status="success" position="fixed" bottom="10px" left="50%" transform="translateX(-50%)" zIndex="1100">
-          <AlertIcon />
-          Template saved successfully
-        </Alert>
-      )}
+        <Modal
+          isOpen={isRetrieveModalOpen}
+          onClose={customOnRetrieveModalClose}
+        >
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Retrieve Template</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <Flex
+                ref={ref}
+                direction="column"
+                position="relative"
+                width="100%"
+              >
+                <Flex>
+                  <Input
+                    placeholder="Template Title"
+                    value={title}
+                    onChange={handleTitleInputChange}
+                  />
+                  <IconButton
+                    aria-label="Open Dropdown"
+                    marginLeft="12px"
+                    icon={<ChevronDownIcon />}
+                    onClick={toggleDropdown}
+                  />
+                </Flex>
+                {isDropdownOpen && (
+                  <Box
+                    position="absolute"
+                    marginTop="48px"
+                    width="100%"
+                    bg="white"
+                    maxHeight="250px"
+                    overflowY="auto"
+                    border="1px solid"
+                    borderColor="gray.200"
+                    zIndex="1"
+                  >
+                    {filteredTitles.length > 0 ? (
+                      filteredTitles.map((t) => (
+                        <Box
+                          key={t}
+                          p={2}
+                          borderBottom="1px solid"
+                          borderColor="gray.100"
+                          _hover={{ bg: "gray.50" }}
+                          onClick={() => {
+                            handleTitleSelect(t);
+                            setIsDropdownOpen(false);
+                          }}
+                        >
+                          {t}
+                        </Box>
+                      ))
+                    ) : (
+                      <Box p={2}>No Templates Found</Box>
+                    )}
+                  </Box>
+                )}
+              </Flex>
+            </ModalBody>
 
-      {isRetrieveSuccess && (
-        <Alert status="success" position="fixed" bottom="10px" left="50%" transform="translateX(-50%)" zIndex="1100">
-          <AlertIcon />
-          Template successfully retrieved
-        </Alert>
-      )}
-
-      {isTemplateNotFound && (
-        <Alert status="error" position="fixed" bottom="10px" left="50%" transform="translateX(-50%)" zIndex="1100">
-          <AlertIcon />
-          Template with this title does not exist!
-        </Alert>
-      )}
-
-      {isDeleteSuccess && (
-        <Alert status="success" position="fixed" bottom="10px" left="50%" transform="translateX(-50%)" zIndex="1100">
-          <AlertIcon />
-          Template deleted successfully!
-        </Alert>
-      )}
-
-      {isItemsValid && (
-          <Alert status="error" position="fixed" bottom="10px" left="50%" transform="translateX(-50%)" zIndex="1100">
-            <AlertIcon />
-            Cannot save an empty template. Please add some items.
+            <ModalFooter>
+              <Button
+                colorScheme="blue"
+                mr={3}
+                onClick={handleRetrieveButtonClick}
+              >
+                Retrieve
+              </Button>
+              <Button variant="ghost" onClick={onRetrieveModalClose}>
+                Cancel
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+        {isDuplicateTitle && (
+          <Alert
+            status="error"
+            position="fixed"
+            bottom="10px"
+            width="480px"
+            zIndex="1100"
+            marginLeft="24px"
+          >
+            <AlertIcon />A template with this title already exists. Please use a
+            different title.
           </Alert>
-       )}
+        )}
 
-      {isTemplateUnsavedAlertVisible && (
-        <Alert status="error" position="fixed" bottom="10px" left="50%" transform="translateX(-50%)" zIndex="1100">
-          <AlertIcon />
-          Save the template before previewing.
-        </Alert>
-      )}
-    </Box>
+        {isSaveSuccess && (
+          <Alert
+            status="success"
+            position="fixed"
+            bottom="10px"
+            width="480px"
+            zIndex="1100"
+            marginLeft="24px"
+          >
+            <AlertIcon />
+            Template saved successfully
+          </Alert>
+        )}
+
+        {isRetrieveSuccess && (
+          <Alert
+            status="success"
+            position="fixed"
+            bottom="10px"
+            width="480px"
+            zIndex="1100"
+            marginLeft="24px"
+          >
+            <AlertIcon />
+            Template successfully retrieved
+          </Alert>
+        )}
+
+        {isTemplateNotFound && (
+          <Alert
+            status="error"
+            position="fixed"
+            bottom="10px"
+            width="480px"
+            zIndex="1100"
+            marginLeft="24px"
+          >
+            <AlertIcon />
+            Template with this title does not exist!
+          </Alert>
+        )}
+
+        {isDeleteSuccess && (
+          <Alert
+            status="success"
+            position="fixed"
+            bottom="10px"
+            width="480px"
+            zIndex="1100"
+            marginLeft="24px"
+          >
+            <AlertIcon />
+            Template deleted successfully!
+          </Alert>
+        )}
+
+        {isItemsValid === false && (
+          <Alert
+            status="error"
+            position="fixed"
+            bottom="10px"
+            width="480px"
+            zIndex="1100"
+            marginLeft="24px"
+          >
+            <AlertIcon />
+            Please create a template before saving, it is not possible to save
+            an empty template!
+          </Alert>
+        )}
+
+        {isTemplateUnsavedAlertVisible && (
+          <Alert
+            status="error"
+            position="fixed"
+            bottom="10px"
+            width="480px"
+            zIndex="1100"
+            marginLeft="24px"
+          >
+            <AlertIcon />
+            Save the template before previewing.
+          </Alert>
+        )}
+      </Box>
     </Flex>
   );
 }

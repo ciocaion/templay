@@ -98,9 +98,7 @@ const Components: React.FC<ComponentProps> = ({ isSidebarCollapsed }) => {
                 onClick={handlePrev}
                 leftIcon={<ChevronLeftIcon />}
                 marginEnd={2}
-              >
-                Prev
-              </Button>
+              ></Button>
               <Slider
                 value={sliderValue}
                 min={0}
@@ -116,9 +114,7 @@ const Components: React.FC<ComponentProps> = ({ isSidebarCollapsed }) => {
                 onClick={handleNext}
                 rightIcon={<ChevronRightIcon />}
                 marginStart={2}
-              >
-                Next
-              </Button>
+              ></Button>
             </Flex>
           </VStack>
         </Box>
